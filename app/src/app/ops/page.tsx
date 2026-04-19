@@ -2,8 +2,12 @@
 // 최근 24h 각 source 의 crawler_runs · deal_verifications · api_usage_daily 를
 // 한 장에 요약. "뭔가 이상해" → 1분 내 원인 특정.
 //
-// 접근 제어: 공개 (ADR-019 Deprecated 방침 따름). 메타데이터만 노출되는 경로이나
-// 운영 민감도 고려해 service_role 로 읽음 (anon RLS 엄격화 이후).
+// 접근 제어: OPS_ACCESS_TOKEN env 기반 쿼리 토큰 (2026-04-19 QA 회고).
+//   env 미설정 → 404 로 위장 (페이지 존재 숨김)
+//   env 설정 + URL ?key=<token> 일치 → 통과
+//   불일치 → 404
+
+import { notFound } from 'next/navigation';
 
 import { getAnonClient, getServiceClient } from '@/lib/db';
 
@@ -107,7 +111,19 @@ function formatKrwTimestamp(s: string | null): string {
   return d.toISOString().replace('T', ' ').slice(0, 19) + 'Z';
 }
 
-export default async function OpsPage() {
+type OpsPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function OpsPage({ searchParams }: OpsPageProps) {
+  // Access token gate (2026-04-19 QA): OPS_ACCESS_TOKEN env 기반 쿼리 토큰.
+  const expected = process.env.OPS_ACCESS_TOKEN;
+  const params = searchParams ? await searchParams : {};
+  const provided = typeof params.key === 'string' ? params.key : null;
+  if (!expected || !provided || provided !== expected) {
+    notFound();
+  }
+
   const { bySource, verificationBuckets, usage } = await loadOps();
   const now = new Date();
 

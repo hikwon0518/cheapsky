@@ -60,13 +60,16 @@ describe('parsePrice', () => {
     expect(parsePrice('대한항공 왕복 300,000원 → 150,000원 특가')).toBe(150000);
   });
 
-  it('filters out under-30,000 misparses (tax/fee/partial)', () => {
+  it('filters out under-50,000 misparses (tax/fee/partial/편도/역대가)', () => {
     expect(parsePrice('세금 6,250원 포함')).toBeNull();
-    expect(parsePrice('공항세 29,999원')).toBeNull();
+    expect(parsePrice('공항세 49,999원')).toBeNull();
+    expect(parsePrice('편도 38,000원')).toBeNull();
   });
 
-  it('prefers 30,000+ candidate over sub-threshold noise', () => {
+  it('prefers 50,000+ candidate over sub-threshold noise', () => {
     expect(parsePrice('왕복 135,000원 (세금 12,700원 별도)')).toBe(135000);
+    // 50,000 경계: 포함
+    expect(parsePrice('편도 50,000원부터')).toBe(50000);
   });
 });
 

@@ -195,7 +195,7 @@ export async function loadHeroTop3(
       .eq('verification_status', 'active')
       .gt('expires_at', ctx.nowIso)
       .or(ctx.departFutureOrNull)
-      .gte('price_krw', 30000)
+      .gte('price_krw', 50000)
       .order('discount_rate', { ascending: false, nullsFirst: false })
       .limit(3);
     q = applyFiltersToDealQuery(q, filters, ctx);
@@ -219,7 +219,7 @@ export async function loadHeroTop3(
       .gte('posted_at', sevenDaysAgo)
       .neq('verification_status', 'snapshot')
       .or(ctx.departFutureOrNull)
-      .gte('price_krw', 30000)
+      .gte('price_krw', 50000)
       .order('discount_rate', { ascending: false, nullsFirst: false })
       .limit(3);
     q = applyFiltersToDealQuery(q, filters, ctx, { applySince: false });
@@ -249,7 +249,7 @@ export async function loadCommunityPicks(
       .eq('verification_status', 'active')
       .gt('expires_at', ctx.nowIso)
       .or(ctx.departFutureOrNull)
-      .gte('price_krw', 30000)
+      .gte('price_krw', 50000)
       .order('posted_at', { ascending: false })
       .limit(16);
     if (ctx.regionDests) q = q.in('destination', ctx.regionDests);
@@ -287,7 +287,7 @@ export async function loadDealList(
       .gt('expires_at', ctx.nowIso)
       .neq('verification_status', 'snapshot')
       .or(ctx.departFutureOrNull)
-      .gte('price_krw', 30000)
+      .gte('price_krw', 50000)
       .order('posted_at', { ascending: false })
       .limit(50);
     q = applyFiltersToDealQuery(q, filters, ctx);

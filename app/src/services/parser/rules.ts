@@ -89,8 +89,9 @@ function isExcludedByKeyword(text: string): boolean {
  * - `만` 또는 `만원` 이 붙은 수는 × 10000.
  * - 숫자만이거나 `KRW`/`원` 이 붙은 경우 그대로 (쉼표 제거).
  * - 두 건 이상 발견되면 **가장 작은** 값(특가 가능성).
- * - 30,000원 미만·5천만원 초과는 버림 (국제선 최저가 하한 — 그 이하는
- *   세금·공항세·편도 일부·환급액 같은 오매칭일 가능성 높음).
+ * - **50,000원 미만·5천만원 초과는 버림** (QA 회고 2026-04-19: 30K 로는 불충분,
+ *   30K~50K 구간 대부분이 편도 / tax-only / 오매칭으로 판명. 친구 평가에서
+ *   "진짜 가격?" 불신 유발).
  */
 export function parsePrice(text: string): number | null {
   if (!text) return null;
@@ -123,7 +124,7 @@ export function parsePrice(text: string): number | null {
     if (Number.isFinite(n) && n >= 10000) candidates.push(n);
   }
 
-  const valid = candidates.filter((v) => v >= 30_000 && v <= 50_000_000);
+  const valid = candidates.filter((v) => v >= 50_000 && v <= 50_000_000);
   if (valid.length === 0) return null;
   // 최솟값 채택 (가장 낮은 가격이 딜의 핵심일 가능성 높음).
   return Math.min(...valid);

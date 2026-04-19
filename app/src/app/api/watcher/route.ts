@@ -11,6 +11,7 @@
 import { NextResponse } from 'next/server';
 
 import { getServiceClient } from '@/lib/db';
+import { checkRate, extractIp } from '@/lib/rate-limit';
 import { getWatcherOwner } from '@/lib/watcher';
 
 export const runtime = 'nodejs';
@@ -29,6 +30,23 @@ const IATA = /^[A-Z]{3}$/;
 const MONTH = /^\d{4}-\d{2}$/;
 
 export async function POST(req: Request): Promise<Response> {
+  // Rate limit: IP 당 10 POST/min (스팸·자동등록 방어).
+  const ip = extractIp(req);
+  const rl = checkRate(`watcher-post:${ip}`, 10);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'rate limited', resetAt: rl.resetAt },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(
+            Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000)),
+          ),
+        },
+      },
+    );
+  }
+
   const owner = getWatcherOwner();
   if (!owner) {
     return NextResponse.json(

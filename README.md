@@ -38,7 +38,7 @@ pnpm install
 
 # 2) 환경 변수 (ADR-002 · public repo 전제로 secrets 는 .env.local 에만)
 cp .env.example .env.local
-# .env.local 편집: Supabase URL·KEY, CRAWLER_USER_AGENT, BASIC_AUTH, SHARE_TOKENS
+# .env.local 편집: Supabase URL·KEY, CRAWLER_USER_AGENT, ANTHROPIC_API_KEY (Stretch 2)
 
 # 3) DB 마이그레이션
 psql "$SUPABASE_DB_URL" -f scripts/migrate.sql

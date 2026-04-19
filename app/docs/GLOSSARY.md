@@ -114,6 +114,22 @@
 - 사용 예: `deals.sources` = `['ppomppu']` · Community Picks 섹션 (Stretch).
 - 금지 맥락: 조회수·댓글 **절대 숫자** 를 UI 에 노출 금지 (사이트 간 스케일 상이로 오해 소지). `HOT` / `TRENDING` 이진 라벨만.
 
+### ④ 커뮤니티 확장 (클리앙 / Phase 3)
+- 정의: 클리앙 알뜰구매 게시판(jirum) 크롤러. Phase 3 3-community-expansion (ADR-030) 에서 추가된 4번째 소스. 항공권 딜 밀도는 뽐뿌·루리웹 대비 낮지만 **소스 교차 매칭** 으로 놓침 리스크 완화에 기여.
+- 사용 예: `deals.sources` 에 `clien` 포함. `sources.length >= 3` 일 때 `social_signal='hot'` 강제 승격 (ADR-030).
+- 금지 맥락: ADR-008 동일 원칙 — robots.txt `Allow: /service/board/` + `Disallow: /*?*` 준수, 쿼리 스트링 URL 금지 (canonical path 만). 작성자 식별자(`data-author-id` 등) 저장 금지.
+
+### 🟥 Rejected: 디시인사이드 (2026-04-20 step0 preflight)
+- 정의: `gall.dcinside.com/mgallery/board/lists/?id=airplane_new2` 항공권 갤러리.
+- 상태: **영구 skip**. 이유: robots.txt `User-agent: * Disallow: /` — Googlebot/Yeti 등 whitelist 검색엔진만 허용. Cheapsky UA 미허용.
+- 재개 조건: dcinside 정책 변경 시에만 (자동 재점검 없음).
+
+### 소스 교차 매칭 (Cross-source matching, ADR-030)
+- 정의: 동일 `dedupe_key` 에 복수 소스가 누적될 때 `deals.sources` 배열이 union.
+- 승격 규칙: `sources.length >= 3` → `social_signal='hot'` 강제 (기존 views 기반 규칙과 OR).
+- UI 표기: `SourceTag` 에 "A · B · C · 3곳 동시 등장" 포맷. 상위 3개 + 초과는 "(외 N곳)" overflow.
+- 목적: 여러 커뮤니티 동시 포스팅 = 실제 핫 확률 압도적으로 높음. 각 소스 독립 검증.
+
 ### 시세 API (Rejected 2026-04-19, 영구 제외)
 - 정의: Amadeus · Duffel · Kiwi · Travelpayouts · FlightAPI · Skyscanner Partner 등 GDS 기반 flight API 일체. **ADR-022 Rejected** 로 영구 미도입.
 - 사용 예: **없음 (영구)**. `services/amadeus.ts` 등 어떤 시세 클라이언트도 존재하지 않음.

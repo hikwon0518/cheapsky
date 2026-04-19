@@ -76,7 +76,10 @@ export function rowToDeal(r: DealRow): Deal {
     dedupeKey: r.dedupe_key,
     sources: (r.sources ?? []).filter(
       (s): s is Source =>
-        s === 'ppomppu' || s === 'ruliweb' || s === 'playwings',
+        s === 'ppomppu' ||
+        s === 'ruliweb' ||
+        s === 'playwings' ||
+        s === 'clien',
     ),
     sourceUrls: r.source_urls ?? [],
     title: r.title,
@@ -302,37 +305,55 @@ export async function loadDealList(
 }
 
 /**
- * sourceHealth (뽐뿌 최근 성공) + stale 여부. Core.
+ * sourceHealth + stale 여부. 모든 활성 크롤러 소스의 최근 성공 시각.
+ * Core: ppomppu. Stretch 1: ruliweb · playwings. Stretch 3 (ADR-030): clien.
+ * stale 판정은 ppomppu 기준 (Core 소스) — ppomppu 가 2h+ 늦어지면 상단 배너.
  */
+const HEALTH_SOURCES: ReadonlyArray<{ source: Source; label: string }> = [
+  { source: 'ppomppu', label: '뽐뿌' },
+  { source: 'ruliweb', label: '루리웹' },
+  { source: 'playwings', label: '플레이윙즈' },
+  { source: 'clien', label: '클리앙' },
+];
+
 export async function loadCrawlerHealth(
   client: Client,
   now: Date,
 ): Promise<{ sources: SourceHealth[]; stale: boolean }> {
   const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
-  let ppomppuLast: Date | null = null;
-  try {
-    const res = await client
-      .from('crawler_runs')
-      .select('source, started_at, finished_at, success')
-      .eq('source', 'ppomppu')
-      .eq('success', true)
-      .order('started_at', { ascending: false })
-      .limit(1);
-    if (!res.error && res.data && res.data.length > 0) {
+
+  async function lastSuccessOf(source: Source): Promise<Date | null> {
+    try {
+      const res = await client
+        .from('crawler_runs')
+        .select('source, started_at, finished_at, success')
+        .eq('source', source)
+        .eq('success', true)
+        .order('started_at', { ascending: false })
+        .limit(1);
+      if (res.error || !res.data || res.data.length === 0) return null;
       const row = res.data[0] as {
         started_at: string;
         finished_at: string | null;
       };
       const s = row.finished_at ?? row.started_at;
       const d = s ? new Date(s) : null;
-      ppomppuLast = d && Number.isFinite(d.getTime()) ? d : null;
+      return d && Number.isFinite(d.getTime()) ? d : null;
+    } catch {
+      return null;
     }
-  } catch {
-    ppomppuLast = null;
   }
-  const sources: SourceHealth[] = [
-    { source: 'ppomppu', label: '뽐뿌', lastSuccessAt: ppomppuLast },
-  ];
+
+  const results = await Promise.all(
+    HEALTH_SOURCES.map(async (s) => ({
+      source: s.source,
+      label: s.label,
+      lastSuccessAt: await lastSuccessOf(s.source),
+    })),
+  );
+
+  const sources: SourceHealth[] = results;
+  const ppomppuLast = results[0]?.lastSuccessAt ?? null;
   const stale =
     !ppomppuLast || now.getTime() - ppomppuLast.getTime() > TWO_HOURS_MS;
   return { sources, stale };

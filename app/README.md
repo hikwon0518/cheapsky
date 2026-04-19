@@ -4,8 +4,8 @@
 
 ## Why
 
-- 한국 커뮤니티(뽐뿌·루리웹·클리앙)는 항공권 핫딜의 2~3차 전파라 지연·범위 편향이 심함
-- 무료로 쓸 수 있는 외부 시세 API 가 부재 — 외부 시세 API 는 Stretch 3 조건부 (아래 "변경 이력" 참조)
+- 한국 커뮤니티(뽐뿌·루리웹·플레이윙즈·클리앙)는 항공권 핫딜의 2~3차 전파라 지연·범위 편향이 있으나, **GDS 밖 채널(카드사 프로모션·여행사 단독 블록·OTA 단독 특가·error fare)** 을 담는 유일한 실체 경로
+- 외부 시세 API 는 **영구 미도입** — ADR-022 Rejected (2026-04-19). 근거: GDS ≠ 핫딜 소스. 자세한 논거는 "변경 이력" 참조
 - 그래서 **커뮤니티 관측(`price_observations`) + 수동 시드(`baseline_seed.json`) 하이브리드** 로 FSC/LCC 분위수를 구성해 "지금 저점인지"를 세 갈래 증거(할인율·분위수·시장 평균 대비)로 설명
 
 ## 차별화 포인트
@@ -125,13 +125,15 @@ pnpm lint
 
 ### 변경 이력
 
-- **2026-04-18** ADR-022 Deprecated — Amadeus for Developers 포털 신규 가입 중단 확인. Core baseline 은 수동 시드 + 관측 단독 운영으로 재편. 외부 시세 API 는 Stretch 3 조건부 (포털 재오픈 또는 ToS·비용 통과하는 대안 확보 시).
+- **2026-04-18** ADR-022 Deprecated — Amadeus for Developers 포털 신규 가입 중단 확인. Core baseline 은 수동 시드 + 관측 단독 운영으로 재편.
+- **2026-04-19** ADR-022 **Rejected** (영구 제외) · ADR-026 재작성 · ADR-030 신규 — Phase 3 슬롯을 `3-stretch-market-api` 에서 `3-community-expansion` 으로 재할당. 근거: GDS 기반 flight API 는 핫딜 소스가 아니라 정규 retail 가격 baseline 에 불과하며 그 역할은 이미 관측+시드가 수행 중. Cheapsky 의 차별화는 커뮤니티 신호 품질이므로 Phase 3 투자 방향을 커뮤니티 소스 확장으로 전환.
+- **2026-04-20** Phase 3 step 0~3 완료 — 클리앙 크롤러(ADR-030) · 소스 교차 매칭(N=3 → hot 승격). dcinside 는 robots.txt `Disallow: /` 로 영구 skip.
 
 ### Stretch 범위
 
 - **1-stretch-sources** — 완료. 커뮤니티 확장 (루리웹 크롤러 · 플레이윙즈 크롤러 (ADR-025 동의 절차 통과 후) · Community Picks 섹션)
 - **2-stretch-enhancements** — 완료. LLM 파싱 폴백 · 카드 큐레이션 · 스파크라인 · 시세 히트맵 · 노선 빈도 · 실효성 검증 정밀 (GET+가격 패턴) · 아카이브 페이지 · GLOSSARY / OPERATIONS / LLM_PROMPTS 문서
-- **3-stretch-market-api** — 외부 조건부 (ADR-022 Deprecated). Amadeus 포털 재오픈 또는 ToS·비용 통과하는 대안 확보 시에만 착수
+- **3-community-expansion** — 진행 중 (ADR-030). 클리앙 알뜰구매 크롤러 · 소스 교차 매칭(N=3 → `social_signal='hot'` 승격) · CrawlerHealth 4-source 확장 완료. dcinside 영구 skip (robots.txt), 네이버 블로그 큐레이터는 ADR-025 절차 대기 (step5 선택적)
 
 ### 관련 문서
 

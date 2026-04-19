@@ -525,7 +525,7 @@
 				
                 <div class="post_author">
                     <span class="view_count">
-                        <span class="fa fa-eye"></span> <strong>9,701</strong>
+                        <span class="fa fa-eye"></span> <strong>9,704</strong>
                     </span>
                     <span class="view_count date">
                         <span class="fa fa-clock-o"></span> 2026-04-13 07:36:58
@@ -1370,7 +1370,7 @@
 		beforeSend: function(xhr, settings) {
 			if (settings.type === 'POST' || settings.type === 'PUT' || settings.type === 'DELETE') {
 				if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-					xhr.setRequestHeader("X-CSRF-TOKEN", "be4bd541-53d0-45d4-91c9-b0a90622948f");
+					xhr.setRequestHeader("X-CSRF-TOKEN", "010b924a-d903-4a45-a5bc-c9a9c0e97e3d");
 				}
 			}
 		}
@@ -1577,7 +1577,7 @@ function CommentImgUpload() {
 		uploadMultiple: false,
 		dictRemoveFileConfirmation: '이미지를 삭제하시겠습니까?',
 		headers: {
-			'X-CSRF-Token': "be4bd541-53d0-45d4-91c9-b0a90622948f"
+			'X-CSRF-Token': "010b924a-d903-4a45-a5bc-c9a9c0e97e3d"
 		},
 		autoProcessQueue: true, // 자동 처리 비활성화
 		maxFilesize: 15, // Default size for other file types

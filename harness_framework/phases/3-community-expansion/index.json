@@ -1,15 +1,14 @@
 {
   "project": "cheapsky",
   "phase": "3-community-expansion",
+  "status": "completed_with_optional_deferred",
+  "started_at": "2026-04-20T01:00:00+0900",
+  "completed_at": "2026-04-20T01:45:00+0900",
   "adr_basis": ["ADR-022 Rejected 2026-04-19", "ADR-026 재작성 2026-04-19", "ADR-030 신규 2026-04-19"],
   "description": "커뮤니티 소스 확장 (클리앙 · 디시 · 조건부 네이버 블로그) + 소스 교차 매칭으로 핫딜 감지력 강화. Phase 3 슬롯은 이전 '3-stretch-market-api' 에서 재할당 (ADR-022 Rejected).",
+  "outcome_summary": "4 step completed (0·1·3·4) + 1 skipped (2: dcinside robots 차단) + 1 deferred (5: 네이버 블로거 ADR-025 절차 필요). 실 효과: 크롤러 3 → 4 소스 확장 + 소스 교차 매칭 N=3 hot 승격. 407/407 tests, typecheck/lint clean.",
   "prereqs": {
-    "completed_phases": ["0-core-mvp", "1-stretch-sources", "2-stretch-enhancements"],
-    "hard_blockers": [
-      "각 신규 소스의 robots.txt 에서 해당 게시판 경로 허용 여부 (step0 점검)",
-      "각 신규 소스 ToS 에 자동화 수집 금지 명시 여부 (명시 있으면 해당 소스 drop)",
-      "UA 업데이트 0.1 → 0.2 (개인+지인 실사용 프레임 반영)"
-    ]
+    "completed_phases": ["0-core-mvp", "1-stretch-sources", "2-stretch-enhancements"]
   },
   "steps": [
     {
@@ -18,46 +17,53 @@
       "status": "completed",
       "started_at": "2026-04-20T01:00:00+0900",
       "completed_at": "2026-04-20T01:15:00+0900",
-      "summary": "clien robots.txt(/service/board/ Allow)+ToS 점검 → clien.passed=true (알뜰구매 볼륨 낮음 caveat). dcinside robots.txt(User-agent: * Disallow: /) → dcinside.passed=false, step2 영구 skip. 네이버 블로거는 step5 로 deferral. clien-list.html(130KB) + clien-detail.html(86KB) fixture 저장. UA v0.2 .env.example 반영 확인. 상세: step0-output.json"
+      "summary": "clien robots.txt(/service/board/ Allow)+ToS 점검 → clien.passed=true (알뜰구매 볼륨 낮음 caveat). dcinside robots.txt(User-agent: * Disallow: /) → dcinside.passed=false, step2 영구 skip. clien-list.html(130KB) + clien-detail.html(86KB) fixture 저장. UA v0.2 반영. commit: b7b1e77."
     },
     {
       "step": 1,
       "name": "clien-crawler",
-      "status": "pending",
-      "summary": "services/crawlers/clien.ts 구현 (알뜰구매 게시판 항공권 태그 필터 · ADR-008 동일 요청 간격 ≥1초 + 동시성 1 · 순수 함수 (config) => RawPost[]). scripts/crawl.ts 에 source='clien' 통합 + crawler_runs 기록. fixture 회귀 테스트."
+      "status": "completed",
+      "started_at": "2026-04-20T01:15:00+0900",
+      "completed_at": "2026-04-20T01:31:00+0900",
+      "summary": "services/crawlers/clien.ts (순수 함수, ALLOWED_PATHS /service/board/jirum only, robots `Disallow: /*?*` 대응 isAllowedPath 쿼리 거절) + sanitizeHtmlForParse (node-html-parser 이슈 회피). parseList: div.list_item 순회, span.list_subject title 추출, list_reply 댓글 anchor 제외. types/deal.ts Source 에 'clien' 추가. scripts/crawl.ts SOURCES 배열 4번째 엔트리. DealCard/SourceTag SOURCE_LABEL 에 '클리앙' 추가. 27 신규 테스트 전부 green (400 total). commit: 주커밋."
     },
     {
       "step": 2,
       "name": "dcinside-crawler",
       "status": "skipped",
-      "skip_reason": "step0 preflight: dcinside robots.txt 가 User-agent * Disallow: / — Cheapsky UA 미허용. ADR-008 robots.txt 준수 원칙으로 영구 skip. BACKLOG 🟥 Rejected 기록 예정.",
+      "skip_reason": "step0 preflight: dcinside robots.txt 가 User-agent * Disallow: / — Cheapsky UA 미허용. ADR-008 robots.txt 준수 원칙으로 영구 skip. BACKLOG 🟥 Rejected 기록 완료.",
       "reopen_condition": "dcinside robots.txt 정책 변경 시 재검토 (자동 재점검 없음)"
     },
     {
       "step": 3,
       "name": "cross-source-matching",
-      "status": "pending",
-      "summary": "dedupe 쿼리 레이어에서 sources 배열 확장 (최대 6 엔트리). sources.length >= 3 일 때 social_signal='hot' 강제 부여 (기존 socialSignal 규칙과 OR). DealCard 에 다중 소스 라벨 렌더 (60자 cut). 테스트: 2 소스 = hot 미부여, 3 소스 = hot 부여 경계."
+      "status": "completed",
+      "started_at": "2026-04-20T01:31:00+0900",
+      "completed_at": "2026-04-20T01:40:00+0900",
+      "summary": "scripts/crawl.ts upsertDeal UPDATE 경로에 `mergedSources.length >= 3 → social_signal='hot'` 강제 승격 (기존 views 규칙과 OR). INSERT 경로도 동일 방어. SourceTag 에 formatSourcesLabel 순수 함수 분리 + 'A · B · C · 3곳 동시 등장' 포맷 + '(외 N곳)' overflow. 7 신규 단위 테스트 (407 total). vitest.config.ts 에 .test.tsx include 추가."
     },
     {
       "step": 4,
       "name": "crawler-health-ui-docs",
-      "status": "pending",
-      "summary": "CrawlerHealth 컴포넌트에 clien/dcinside 점 추가 (기존 ppomppu/ruliweb/playwings 3개 → 5개). services/home-queries.ts loadCrawlerHealth 가 모든 source 반환. crawler_runs.source check 제약 완화 ('clien','dcinside' 추가, 신규 migration). app/README.md Stretch 3 섹션 완료로 갱신. OPERATIONS.md 주기 작업 표 · GLOSSARY.md 소스 정의 추가."
+      "status": "completed",
+      "started_at": "2026-04-20T01:40:00+0900",
+      "completed_at": "2026-04-20T01:45:00+0900",
+      "summary": "services/home-queries.ts loadCrawlerHealth 을 전 소스 순회(ppomppu/ruliweb/playwings/clien)로 확장. rowToDeal sources 필터에 'clien' 추가 (기존 3종만 허용했던 버그 fix). crawler_runs.source 는 text 제약 없는 컬럼이라 migration 불필요. app/README.md Stretch 범위/변경 이력 갱신. OPERATIONS 2.1 제목에 '클리앙' 추가. GLOSSARY ④ 커뮤니티 확장(클리앙) + 소스 교차 매칭 + dcinside Rejected 섹션 추가."
     },
     {
       "step": 5,
       "name": "naver-blog-conditional",
-      "status": "pending",
+      "status": "deferred",
       "optional": true,
-      "summary": "(선택) 네이버 블로그 큐레이터 크롤러. ADR-025 절차 각 블로거별 재적용 — RSS 탐색 우선 → 메일 통보 → 10 영업일 대기. LLM 기반 제목 추출 (Stretch 2 curator 재활용). 응답/동의 없으면 phase 완료 전까지 step skip · BACKLOG 로 복귀."
+      "defer_reason": "ADR-025 절차 (RSS 탐색 → 메일 통보 → 10 영업일 대기) 가 각 블로거별 필요. 자동 진행 불가. 후보 블로거 (어미새 · 트래블위즈 · 트립월드) 연락처 확보 + 메일 송부 후 수동 재개 필요.",
+      "resume_handoff": "community_consent_log.md 신규 생성 시 각 블로거별 RSS/메일/응답 타임라인 기록. 동의 블로거 확보 시 services/crawlers/naver_blog.ts 착수."
     }
   ],
-  "exit_criteria": [
-    "pnpm test · pnpm typecheck · pnpm lint 전부 통과",
-    "neue crawler_runs 테이블에 clien/dcinside 실행 기록 존재 (실 크롤 확인)",
-    "DealCard 에 3+ 소스 교차 딜이 있으면 'N곳 동시 등장' 라벨 렌더",
-    "CrawlerHealth 5점 표시 (ppomppu/ruliweb/playwings/clien/dcinside)",
-    "docs 동기화 (ADR 의존 지도 + README + OPERATIONS + GLOSSARY)"
+  "exit_criteria_met": [
+    "✅ pnpm test 407/407 · pnpm typecheck clean · pnpm lint clean",
+    "✅ DealCard 에 3+ 소스 교차 딜 'N곳 동시 등장' 라벨 렌더 (formatSourcesLabel)",
+    "✅ CrawlerHealth 4점 표시 (ppomppu/ruliweb/playwings/clien). 5점 (+dcinside) 은 step2 skip 으로 정정",
+    "✅ docs 동기화 (ADR + README + OPERATIONS + GLOSSARY + CLAUDE.md)",
+    "⏳ 실 crawler_runs 테이블에 clien 실행 기록 — 배포 후 cron 1회 실행 시 확인 (본 session 스코프 밖)"
   ]
 }

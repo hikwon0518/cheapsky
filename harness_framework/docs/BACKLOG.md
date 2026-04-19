@@ -26,6 +26,7 @@
 | 김포·제주 출발 | ADR-021 | 동일 |
 | **외부 시세 API 통합 (Amadeus·Duffel·Kiwi·Travelpayouts·FlightAPI·Skyscanner Partner 등)** | **ADR-022 Rejected** | **GDS ≠ 핫딜 소스 (한국 핫딜은 GDS 밖 채널). "시장 baseline" 역할은 관측+시드가 이미 수행. 복원은 신규 ADR 로만 (ADR-022 Rollback 조건)** |
 | Phase 3 = 시세 API 재통합 (`3-stretch-market-api`) | ADR-026 재작성 | Phase 3 슬롯 재활용 → `3-community-expansion` 으로 대체 (ADR-030) |
+| **디시인사이드 항공권 갤러리 크롤링** | **ADR-008 · ADR-030 step0 preflight (2026-04-20)** | **dcinside robots.txt 가 `User-agent: * Disallow: /` — Googlebot/Yeti 등 whitelist 검색엔진만 허용. Cheapsky UA 미허용. robots.txt 준수 원칙(ADR-008)으로 영구 skip. 재개는 정책 변경 감지 시에만** |
 
 ---
 

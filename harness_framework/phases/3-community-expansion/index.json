@@ -15,8 +15,10 @@
     {
       "step": 0,
       "name": "preflight-tos-fixtures",
-      "status": "pending",
-      "summary": "신규 소스 2~3곳의 robots.txt · ToS · rate limit 정책 점검. 통과한 소스만 대상으로 fixture HTML 수집 (__fixtures__/clien-list.html, dcinside-list.html, 필요 시 naver-blog-{blogger}-list.html). UA 상수 v0.2 반영. 실패한 소스는 BACKLOG 로 되돌리고 phase 범위 축소."
+      "status": "completed",
+      "started_at": "2026-04-20T01:00:00+0900",
+      "completed_at": "2026-04-20T01:15:00+0900",
+      "summary": "clien robots.txt(/service/board/ Allow)+ToS 점검 → clien.passed=true (알뜰구매 볼륨 낮음 caveat). dcinside robots.txt(User-agent: * Disallow: /) → dcinside.passed=false, step2 영구 skip. 네이버 블로거는 step5 로 deferral. clien-list.html(130KB) + clien-detail.html(86KB) fixture 저장. UA v0.2 .env.example 반영 확인. 상세: step0-output.json"
     },
     {
       "step": 1,
@@ -27,8 +29,9 @@
     {
       "step": 2,
       "name": "dcinside-crawler",
-      "status": "pending",
-      "summary": "services/crawlers/dcinside.ts 구현 (airplane_new2 갤러리 리스트 크롤러, 노이즈 필터링 엄격 파서 — 개드립/오타/agenda 제외). scripts/crawl.ts 에 source='dcinside' 통합. fixture 회귀 테스트. 파싱 실패는 LLM 폴백 재사용 (Stretch 2 기존)."
+      "status": "skipped",
+      "skip_reason": "step0 preflight: dcinside robots.txt 가 User-agent * Disallow: / — Cheapsky UA 미허용. ADR-008 robots.txt 준수 원칙으로 영구 skip. BACKLOG 🟥 Rejected 기록 예정.",
+      "reopen_condition": "dcinside robots.txt 정책 변경 시 재검토 (자동 재점검 없음)"
     },
     {
       "step": 3,

@@ -285,7 +285,10 @@ async function upsertDeal(
         ? prev.posted_at
         : row.posted_at;
 
-    const mergedSignal = maxSocialSignal(prev.social_signal, newSignal);
+    // ADR-030: 3곳 이상 동시 등장 = strong cross-source signal → hot 강제 승격.
+    // 기존 views 기반 socialSignal 과 OR (둘 중 하나라도 만족).
+    const baseSignal = maxSocialSignal(prev.social_signal, newSignal);
+    const mergedSignal = mergedSources.length >= 3 ? 'hot' : baseSignal;
 
     const updated = {
       ...row,
@@ -303,7 +306,11 @@ async function upsertDeal(
     return prev.id;
   }
 
-  const insertRow = { ...row, social_signal: newSignal };
+  // INSERT 경로는 row.sources.length 가 거의 1 (이번 회차 단일 소스). 교차 매칭은
+  // UPDATE 경로에서 누적될 때 발동. 그래도 동일 규칙을 insert 시에도 적용 (방어).
+  const insertSignal =
+    row.sources.length >= 3 ? 'hot' : newSignal;
+  const insertRow = { ...row, social_signal: insertSignal };
   const ins = await client
     .from('deals')
     .insert(insertRow)

@@ -5,7 +5,6 @@
   "installCommand": "cd app && pnpm install --frozen-lockfile=false",
   "outputDirectory": "app/.next",
   "devCommand": "cd app && pnpm dev",
-  "ignoreCommand": "bash -c 'git diff --quiet HEAD^ HEAD -- app/ || exit 1'",
   "headers": [
     {
       "source": "/(.*)",

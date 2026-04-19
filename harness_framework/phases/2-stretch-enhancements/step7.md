@@ -78,7 +78,7 @@ Stretch 2 의 두 LLM 용도 프롬프트 **완전 아카이빙**. 프롬프트 
 Core README 의 "Stretch 1/2/3 는 진행 중 플레이스홀더" 부분을 교체:
 - Stretch 1: "커뮤니티 확장 (루리웹·플레이윙즈) — 완료"
 - Stretch 2: "LLM 큐레이션·스파크라인·시세 히트맵·아카이브 — 완료"
-- Stretch 3: "시세 API 재통합 — 외부 조건부 (ADR-022 Deprecated)"
+- Stretch 3: "커뮤니티 확장 (클리앙 · 디시 · 조건부 네이버 블로그, ADR-030). 이전 '시세 API 재통합' 슬롯은 ADR-022 Rejected 2026-04-19 로 영구 폐기"
 
 ### 5) docs 링크 추가
 

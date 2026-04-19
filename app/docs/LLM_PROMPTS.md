@@ -211,7 +211,7 @@ const FORBIDDEN = /역대가|Amadeus|Anthropic|Claude|LLM|API/i;
 
 이유:
 - **역대가**: ADR-012 금지 용어 — "사상 최저가" 뉘앙스 금지
-- **Amadeus**: 외부 API 내부 명칭 UI 노출 금지 (ADR-012). ADR-022 Deprecated 이후에도 금지 유지 (히스토리 표기 오염 방지)
+- **Amadeus**: 외부 API 내부 명칭 UI 노출 금지 (ADR-012). ADR-022 Rejected 2026-04-19 (영구 제외) 이후에도 금지 유지 (히스토리 표기 오염 방지)
 - **Anthropic / Claude / LLM / API**: 내부 인프라 명칭 UI 노출 금지 (ADR-012). "AI 추천" · "Claude 가 추천" 식 표현 차단
 
 확장 시:

@@ -5,10 +5,10 @@
 ## 0. 스냅샷 · 핵심 연결 고리
 
 - **DB**: Supabase Postgres (500MB free) · anon read · service_role write
-- **웹**: Vercel Hobby · `runtime=nodejs` middleware (ADR-019 Share Token + Basic Auth)
+- **웹**: Vercel Hobby · 공개 URL (ADR-019 Deprecated — Share Token/Basic Auth 전면 제거 2026-04-19)
 - **배치**: GitHub Actions cron (`cheapsky/.github/workflows/*.yml`) — Public repo 전제 (ADR-002)
 - **LLM**: Anthropic Claude Haiku 4.5 (Stretch 2 한정, `CHEAPSKY_STAGE=stretch` gate)
-- **시세 API**: **없음** (ADR-022 Deprecated). Stretch 3 진입 조건부 부활
+- **시세 API**: **영구 없음** (ADR-022 **Rejected** 2026-04-19 — GDS ≠ 핫딜 소스). 복원은 신규 ADR 로만
 - **상시 관측**: `crawler_runs` · `deal_verifications` · `api_usage_daily` · `/api/health`
 
 모든 시각은 저장 UTC / 표시 KST (ADR-015).

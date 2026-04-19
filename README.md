@@ -2,7 +2,7 @@
 
 **인천 출발 20개 노선 항공권 저점 레이더.** 뽐뿌 · 루리웹 · 플레이윙즈 커뮤니티 관측 + 20 노선 수동 시드 baseline 으로 "지금 저점인가?" 를 세 갈래 증거로 증명하는 Discovery 대시보드.
 
-> 2주짜리 학습용 MVP. **Cheapsky Light v5** (2026-04-19) 라이트 테마 공식 전환.
+> Core/Stretch 1/Stretch 2 완료 (2026-04-19). 이후 **개인 · 소수 지인 실사용 지속 개선 모드** (ADR-026 재작성). **Cheapsky Light v5** 라이트 테마 공식. **외부 시세 API 영구 제외** (ADR-022 Rejected — GDS ≠ 핫딜 소스). Phase 3 = `3-community-expansion` (클리앙 · 디시 · 조건부 네이버 블로그, ADR-030).
 
 ---
 

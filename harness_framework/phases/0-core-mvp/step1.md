@@ -19,8 +19,8 @@
 - 테이블 7개: `deals` · `route_market_data` · `price_observations` · `crawler_runs` · `deal_verifications` · `archive_snapshots` · `api_usage_daily`
 - 인덱스: `deals_discount_idx`, `deals_posted_idx`, `deals_route_idx`, `deals_hot_idx`, `deals_verify_due_idx`, `obs_route_time_idx`, `crawler_runs_recent_idx`, `dv_recent_idx`
 - RLS 정책: 모든 테이블 `enable row level security`, `anon_read_*` 정책만 (쓰기 정책 없음 → service_role 전용)
-- `route_market_data.source` check 제약: `('seed','observed')` **만** 포함. `'amadeus'` / `'api'` 절대 넣지 마라 (ADR-022 Deprecated)
-- `api_usage_daily` 에 `amadeus_calls` 컬럼 넣지 마라 (ADR-022)
+- `route_market_data.source` check 제약: `('seed','observed')` **만** 포함. `'amadeus'` / `'api'` 절대 넣지 마라 (ADR-022 Rejected 2026-04-19, 영구 제외)
+- `api_usage_daily` 에 `amadeus_calls` 컬럼 넣지 마라 (ADR-022 Rejected)
 - `crawler_runs.source` 은 text 로 두고 제약 없이 `'ppomppu','ruliweb','playwings','curator','verifier','archiver','cost_check'` 수용
 
 멱등 실행을 위해 `create table if not exists ...`, `create index if not exists ...`, RLS 정책은 `drop policy if exists ... ; create policy ...` 순서로.

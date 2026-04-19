@@ -8,10 +8,10 @@
 커뮤니티 관측 + 수동 시드 baseline 에 뽐뿌·(Stretch) 루리웹·플레이윙즈 큐레이션 딜을 교차하여, 가성비 탐험가에게 "오늘 인천에서 어디로 싸게 갈 수 있는지"를 세 가지 증거(분위수 수치·사회적 반응·시장 평균 대비)로 보여준다.
 
 ## 배경
-- 한국 커뮤니티(뽐뿌·루리웹·클리앙)는 항공권 핫딜의 **2~3차 전파**라 지연·범위 편향이 심함
+- 한국 커뮤니티(뽐뿌·루리웹·클리앙·디시)는 항공권 핫딜의 **2~3차 전파**라 지연·범위 편향이 있으나, **GDS 밖 채널(카드사 프로모션·여행사 단독 블록·OTA 단독 특가·error fare)** 을 담는 유일한 실체 경로
 - 전문 블로그(플레이윙즈)가 더 빠른 1차 전파자
-- 무료 사용 가능한 외부 시세 API 가 부재 (Amadeus for Developers 포털 가입 중단, Travelpayouts 등은 제휴 요구) — **ADR-022 Deprecated** 반영
-- → **2-레이어 소스(블로그 큐레이션 + 커뮤니티) + Baseline(관측+수동 시드)** 구조로 재편. 시간이 갈수록 관측이 누적돼 baseline 정확도 자동 상승
+- **외부 시세 API 는 영구 미도입** — **ADR-022 Rejected (2026-04-19)** 반영. GDS 기반 API (Amadeus · Duffel · FlightAPI 등) 는 정규 retail 가격만 노출하므로 핫딜 감지 경로가 아님. "시장 baseline" 역할은 관측+시드가 이미 수행 중
+- → **2-레이어 소스(블로그 큐레이션 + 커뮤니티) + Baseline(관측+수동 시드)** 구조 확정. 시간이 갈수록 관측이 누적돼 baseline 정확도 자동 상승. Phase 3 에서 커뮤니티 소스 확장으로 핫딜 감지력 보강 (ADR-030)
 
 ## 포지셔닝
 - ❌ 전세계 모든 노선 감시
@@ -67,7 +67,7 @@ LA(LAX) / 뉴욕(JFK·EWR 병합) / 하와이(HNL)
 - **관측 데이터** (`price_observations`) — 뽐뿌 크롤 데이터가 누적되어 노선별 FSC/LCC 분위수를 자연 형성. 30건 이상 누적되면 관측 단독 운영
 - **수동 시드** (`baseline_seed.json`) — 20개 노선 × FSC/LCC/mixed 엔트리. 관측 콜드 스타트(<10건)일 때 사용. 조사 방법은 `methodology.md`
 - **우선순위**: 관측 ≥30건 (high) → 관측 10~29건 혼합 (medium) → 시드 FSC/LCC (medium) → 시드 mixed (low, 🔥 미부여) → 없음 (🔥 미부여)
-- ADR-022 Deprecated 로 Amadeus 계층은 Core 에 없음. Stretch 3 (외부 조건부) 에서 부활 검토
+- ADR-022 Rejected 로 Amadeus 등 외부 시세 API 계층 영구 제외. 복원은 신규 ADR 로만 (복원 trigger 는 ADR-022 Rollback 조건)
 
 ### ② 큐레이션 딜 — 플레이윙즈 (조건부)
 - 1인 운영 블로그, 정형적 제목 구조
@@ -189,8 +189,8 @@ p10 이하 = 🔥 저점
 
 ## MVP Core vs Stretch (ADR-026)
 
-### Core (친구 평가 최소 요건, ~6~8일)
-> 실측 여유 버퍼 반영: Supabase RLS 디버그·Vercel middleware(Share Token + Basic Auth) 테스트·뽐뿌 파싱 골든셋 튜닝 등 숨은 시간 포함. (ADR-022 Deprecated 로 Amadeus 통합 시간 제거)
+### Core (친구 평가 최소 요건, ~6~8일 — 완료 2026-04-18)
+> 실측 여유 버퍼 반영: Supabase RLS 디버그·뽐뿌 파싱 골든셋 튜닝 등 숨은 시간 포함. (ADR-022 Rejected 로 외부 시세 API 통합 시간 영구 제거, ADR-019 Deprecated 로 Share Token/Basic Auth 관련 시간 제거)
 
 - [x] 프로젝트 부트스트랩 (`.env.example`, `tsconfig.json`, `tailwind.config.ts`, `pnpm-lock.yaml`)
 - [x] Baseline — 시드 20 노선 × FSC/LCC/mixed + 관측(`price_observations`) 가중 혼합 (ADR-011)
@@ -209,30 +209,40 @@ p10 이하 = 🔥 저점
 - [x] 일일 비용 모니터 (`cost_check.ts`) — Supabase 크기 + 관측 누적 추이
 - [x] README (스크린샷 + 1분 DEMO 시나리오 인라인, 별도 `DEMO_SCRIPT.md` 아님)
 
-### Stretch (시간 허락 시, +3~5일)
-> task 분리: **1-stretch-sources** / **2-stretch-enhancements** / **3-stretch-market-api** (외부 조건부, ADR-022 부활).
+### Stretch — 3개 task 분리 (ADR-026)
+> **1-stretch-sources / 2-stretch-enhancements / 3-community-expansion** (이전 `3-stretch-market-api` 는 ADR-022 Rejected 로 영구 폐기됨)
 
-**1-stretch-sources**:
-- [ ] 루리웹 크롤러
-- [ ] 플레이윙즈 크롤러 (ADR-025 절차 통과 후)
-- [ ] Community Picks 섹션
+**1-stretch-sources** (완료 2026-04-19):
+- [x] 루리웹 크롤러
+- [x] 플레이윙즈 크롤러 (ADR-025 절차 통과 후)
+- [x] Community Picks 섹션
 
-**2-stretch-enhancements**:
-- [ ] LLM 파싱 폴백 + 카드 큐레이션 한 줄 (규칙 폴백 위에 자연어 덧씌움)
-- [ ] 스파크라인 + 90일 관측 데이터
-- [ ] 노선 시세 히트맵 섹션 (관측+시드 한정 커버리지, 데스크톱 그리드 · 모바일 `가장 싼 3개 프리뷰 + 접힘`)
-- [ ] 노선 빈도 마이크로 지표
-- [ ] 실효성 검증 정밀(GET + 가격 패턴)
-- [ ] 아카이브 페이지
-- [ ] GLOSSARY / OPERATIONS / LLM_PROMPTS 문서
+**2-stretch-enhancements** (완료 2026-04-19):
+- [x] LLM 파싱 폴백 + 카드 큐레이션 한 줄 (규칙 폴백 위에 자연어 덧씌움)
+- [x] 스파크라인 + 90일 관측 데이터
+- [x] 노선 시세 히트맵 섹션 (관측+시드 한정 커버리지, 데스크톱 그리드 · 모바일 `가장 싼 3개 프리뷰 + 접힘`)
+- [x] 노선 빈도 마이크로 지표
+- [x] 실효성 검증 정밀(GET + 가격 패턴)
+- [x] 아카이브 페이지
+- [x] GLOSSARY / OPERATIONS / LLM_PROMPTS 문서
 
-**3-stretch-market-api** (외부 조건부 — API 가용성·ToS·비용 사전 확인 통과 시):
-- [ ] 시세 API 클라이언트 (Amadeus 포털 재오픈 또는 적정 대안 확보 시)
-- [ ] `scripts/ingest_market.ts` + `route_market_data.source='api'` 갱신
-- [ ] 시세 히트맵 20개 노선 완전 커버
-- [ ] 신규 ADR 추가 (ADR-022 부활 또는 대안 결정)
+**3-community-expansion** (차기 착수 — ADR-030 근거):
+- [ ] 클리앙 알뜰구매 크롤러 (항공권 태그 필터링, ADR-008 동일 원칙)
+- [ ] 디시 항공권 갤러리 크롤러 (엄격 파서)
+- [ ] (조건부) 네이버 블로그 큐레이터 크롤러 (ADR-025 각 블로거별 재적용)
+- [ ] 소스 교차 매칭 로직 (`sources.length >= 3` → `social_signal='hot'` 승격)
+- [ ] `DealCard` 다중 소스 라벨 표기 + `CrawlerHealth` 푸터 확장
 
-**원칙**: Core 완성 전까지 Stretch 항목 손대지 않음. 새 아이디어는 `BACKLOG.md`에만. **3-stretch-market-api 는 외부 조건이 성립해야 진입 가능**.
+**프레임 확장 (2026-04-19)**:
+- 원래 **"2주 학습용 MVP + 친구 평가"** → Core/Stretch 1/Stretch 2 완료 후 **"개인 · 소수 지인 실사용 지속 개선"** 으로 확장
+- 본인+지인 3~5명 대상, 무기한 개선 모드. MVP 범위 (ADR-021 등) 자체는 유지 — 확장은 Phase 큐 순차 소화
+- Phase 3 완료 후 검토 후보: **4-personal-reliability** (운영 신뢰도) / **5-personal-features** (지인 공유 UX) / **6-advanced-analysis** (데이터 축적 후 분석)
+
+**원칙**:
+- Core 완성 전 Stretch 금지 (2026-04-18 Core 완료로 해제)
+- Stretch 중 막히면 다음 Stretch 로 이동, Core 회귀 금지
+- **3-community-expansion** 진입 전제: 각 신규 소스별 robots.txt / ToS 개별 점검 (step0 에서 수행, 거부 시 해당 소스만 drop)
+- 새 아이디어는 `BACKLOG.md` 에만
 
 ## 사용자 플로우 (Happy Path)
 ```
@@ -285,6 +295,12 @@ cheapsky.vercel.app/?t=<token>
 - [ ] "5초 안에 뭐 하는 건지 알겠어?" → 3명 YES
 - [ ] "🔥 배지가 왜 붙었는지 30초 설명 가능?" → 3명 YES
 - [ ] "실제로 쓰고 싶어?" → 최소 2명 YES
+
+### 개인 실사용 모드 (2026-04-19 프레임 확장 반영)
+- [ ] 본인 주간 활성 (주 3회 이상 접속) 3주 이상 지속
+- [ ] 지인 2~3명 신규 onboarding + 1명 이상 주 1회 재방문
+- [ ] Phase 3 완료 후: "오늘 커뮤니티에 뜬 핫딜 중 Cheapsky 가 놓친 것" 주간 회고 0~2건 이하
+- [ ] 크롤러 실패 자동 알림 수신 (Phase 4 도입 시) → 24시간 내 복구
 
 ## 디자인 방향
 - 다크 대시보드, 마케팅 랜딩 금지

@@ -114,10 +114,11 @@
 - 사용 예: `deals.sources` = `['ppomppu']` · Community Picks 섹션 (Stretch).
 - 금지 맥락: 조회수·댓글 **절대 숫자** 를 UI 에 노출 금지 (사이트 간 스케일 상이로 오해 소지). `HOT` / `TRENDING` 이진 라벨만.
 
-### 시세 API (Stretch 3 조건부, Deprecated 2026-04-18)
-- 정의: Amadeus for Developers API. ADR-022 Deprecated 로 Core 에 없음.
-- 사용 예: **현재 없음**. Stretch 3 진입 시 `services/amadeus.ts` + `scripts/ingest_market.ts` + `route_market_data.source='api'` 로만.
-- 금지 맥락: Core 에서 `services/amadeus.ts` 생성 금지. 대안 API 도 신규 ADR 승인 전 금지.
+### 시세 API (Rejected 2026-04-19, 영구 제외)
+- 정의: Amadeus · Duffel · Kiwi · Travelpayouts · FlightAPI · Skyscanner Partner 등 GDS 기반 flight API 일체. **ADR-022 Rejected** 로 영구 미도입.
+- 사용 예: **없음 (영구)**. `services/amadeus.ts` 등 어떤 시세 클라이언트도 존재하지 않음.
+- 금지 맥락: 어떤 단계에서도 생성 금지. 근거: GDS 는 정규 retail 가격만 노출 → 한국 핫딜 (카드사·여행사 단독·OTA 단독·error fare) 은 GDS 밖 채널. "시장 baseline" 역할은 관측+시드가 수행 중. 복원은 신규 ADR 로만 가능하며 trigger 는 ADR-022 Rollback 조건.
+- Phase 3 슬롯은 `3-community-expansion` (ADR-030) 으로 재할당 — 핫딜 감지력 강화 방향.
 
 ---
 

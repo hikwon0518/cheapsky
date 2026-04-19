@@ -1,6 +1,6 @@
 # 아키텍처
 
-> 이 문서의 한 줄 요지: Next.js 15 풀스택 + GH Actions 배치 + Supabase Postgres. 2-레이어 데이터 소스(블로그·커뮤니티) + Baseline(관측+수동 시드)을 FSC/LCC 이중 분위수로 평가. **ADR-022 Deprecated 반영 (Amadeus 계층 제거)**.
+> 이 문서의 한 줄 요지: Next.js 15 풀스택 + GH Actions 배치 + Supabase Postgres. 2-레이어 데이터 소스(블로그·커뮤니티) + Baseline(관측+수동 시드)을 FSC/LCC 이중 분위수로 평가. **ADR-022 Rejected 반영 (외부 시세 API 영구 제외)**. Phase 3 = `3-community-expansion` (클리앙·디시·네이버 블로그 조건부, ADR-030).
 
 ## 한 눈에 보기
 ```
@@ -32,14 +32,14 @@
                         ▼ (RLS anon read)
       ┌──────────────────────────────────────────┐
       │ Next.js 15 on Vercel                     │
-      │ middleware: share_token → Basic Auth     │
+      │ 공개 URL (ADR-019 Deprecated)            │
       │ SHOW_CACHED_ONLY=true → UI 캐시 모드 배너│
       └────────────────┬─────────────────────────┘
                        ▼
                    Browser
 ```
 
-> Stretch 3-stretch-market-api(외부 조건부)가 활성화되면 상단에 `┌─ 시세 API ─┐ → scripts/ingest_market.ts → route_market_data(source='api')` 레인이 추가된다. Core 에는 포함되지 않음.
+> 외부 시세 API 레인은 ADR-022 Rejected (2026-04-19) 로 영구 제외. Phase 3 (`3-community-expansion`) 활성화 시 기존 3개 크롤러 레인에 추가 소스(클리앙·디시·조건부 네이버 블로그)가 나란히 붙고 `sources` 배열 교차 매칭으로 `social_signal='hot'` 승격 분기가 생긴다 (ADR-030).
 
 ## 디렉토리 구조
 ```
@@ -95,7 +95,7 @@ src/
 │   ├── baseline.ts                 # 관측(≥30/혼합/<10) → 시드 폴백, FSC/LCC 분리 (ADR-011)
 │   ├── curator.ts                  # Stretch 2
 │   └── verifier.ts                 # Core(HEAD), Stretch 2(GET+patterns)
-│   # services/amadeus.ts: ADR-022 Deprecated — Core 미구현. Stretch 3 조건부 부활
+│   # services/amadeus.ts: ADR-022 Rejected 2026-04-19 — 영구 미구현. 복원은 신규 ADR 로만
 ├── data/
 │   ├── baseline_seed.json          # 수동 조사 baseline 시드 (20 노선 × FSC/LCC/mixed, ADR-011)
 │   ├── airports.json
@@ -114,7 +114,7 @@ scripts/
 ├── migrate.sql
 ├── seed.sql                        # baseline_seed.json → route_market_data UPSERT 포함
 └── restore_demo.sql
-# scripts/ingest_market.ts: ADR-022 Deprecated — Core 미구현. Stretch 3 조건부 부활
+# scripts/ingest_market.ts: ADR-022 Rejected 2026-04-19 — 영구 미구현. 복원은 신규 ADR 로만
 
 docs/
 ├── PRD.md · ARCHITECTURE.md · ADR.md · UI_GUIDE.md

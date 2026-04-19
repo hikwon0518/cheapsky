@@ -1,11 +1,11 @@
 # 프로젝트: Cheapsky
 
-인천 출발 아시아·미국 20개 노선 항공권을, 커뮤니티 관측 + 수동 시드 baseline 에 블로그·커뮤니티 큐레이션 딜을 교차하여 **"지금 저점인지"를 세 갈래 증거로 증명**하는 Discovery 대시보드. 2주짜리 MVP, 친구 간 상호 평가 맥락 → **작동하는 좁은 제품 > 미완성 넓은 제품**. **ADR-022 Deprecated(2026-04-18, Amadeus 포털 가입 중단) 반영 — 외부 시세 API 는 Stretch 3 조건부**.
+인천 출발 아시아·미국 20개 노선 항공권을, 커뮤니티 관측 + 수동 시드 baseline 에 블로그·커뮤니티 큐레이션 딜을 교차하여 **"지금 저점인지"를 세 갈래 증거로 증명**하는 Discovery 대시보드. Core/Stretch 1/Stretch 2 완료 후 **개인 · 소수 지인 실사용 지속 개선 모드** 로 확장 (ADR-026 재작성, 2026-04-19). **ADR-022 Rejected(2026-04-19) — 외부 시세 API 영구 제외. Phase 3 = `3-community-expansion` (클리앙 · 디시 · 네이버 블로그 조건부, ADR-030)**.
 
 ## 유일한 진실 소스
 - `docs/PRD.md` — 목표·기능·MVP Core/Stretch 범위·성공 지표
 - `docs/ARCHITECTURE.md` — 디렉토리 구조·데이터 모델·흐름
-- `docs/ADR.md` — 28개 결정 (각 ADR에 `[Core]` / `[Stretch]` 태그)
+- `docs/ADR.md` — 30개 결정 (각 ADR에 `[Core]` / `[Stretch]` 태그)
 - `docs/UI_GUIDE.md` — 팔레트·컴포넌트·AI 슬롭 금지·접근성
 - `docs/methodology.md` — 시드 baseline 조사 절차 (20 노선 × FSC/LCC/mixed, 관측 콜드 스타트)
 - `docs/BACKLOG.md` — MVP 범위 밖 아이디어 격리
@@ -18,7 +18,7 @@
 - **DB**: Supabase Postgres (RLS: anon 읽기 only, service_role 쓰기 only)
 - **Baseline**: 수동 시드 (`baseline_seed.json`, 20 노선 × FSC/LCC/mixed) + 관측 재집계 (`price_observations`). ADR-011/024
 - **LLM** (Stretch 2 전용): Anthropic Claude Haiku 4.5
-- **시세 API** (Stretch 3 조건부): ADR-022 Deprecated. 포털 재오픈·대안 확보 전까지 미사용
+- **시세 API**: ADR-022 **Rejected** 2026-04-19. 영구 미도입 (GDS ≠ 핫딜 소스). 복원은 신규 ADR 필요
 - **배포**: Vercel Hobby + GitHub Actions cron (public repo 전제, ADR-002)
 - **패키지 매니저**: pnpm
 - **테스트**: vitest
@@ -35,8 +35,8 @@
   - 환경변수 `CHEAPSKY_STAGE=stretch`로 훅 게이트 해제
   - **다른 LLM SDK 전부 금지**: OpenAI / Google GenAI / Cohere / Mistral / Groq / LangChain / Vercel AI SDK
   - **LLM 전송 범위**: 제목 + 본문 앞 500자까지만 (폴백) / 정제 숫자 필드만 (큐레이션). 본문 전문 전송 금지
-- **외부 시세 API 금지** (ADR-022 Deprecated 2026-04-18) — Amadeus·Travelpayouts·Kiwi 포함. `services/amadeus.ts` 또는 대체 시세 클라이언트는 Core 에 생성 금지. Stretch 3-stretch-market-api 진입 + 신규 ADR 승인 후에만 허용
-- **크롤러 소스는 뽐뿌 + (Stretch 1) 루리웹 + (Stretch 1) 플레이윙즈** (ADR-004) — 클리앙·디시·레드비쥬 금지 (v2 Deferred)
+- **외부 시세 API 영구 금지** (ADR-022 **Rejected** 2026-04-19) — Amadeus · Duffel · Kiwi · Travelpayouts · FlightAPI · Skyscanner Partner · SerpAPI 등 전부. `services/amadeus.ts` 또는 대체 시세 클라이언트는 **어떤 단계에서도 생성 금지**. 복원은 신규 ADR 로만 (ADR-022 Rollback 조건 참조)
+- **크롤러 소스는 뽐뿌 · 루리웹 · 플레이윙즈** (Core/Stretch 1 완료). **Phase 3 착수 시 클리앙 · 디시 · (조건부) 네이버 블로그 추가 허용** (ADR-004 재작성 + ADR-030). 레드비쥬 · 해외 매체 등 나머지는 v2 Deferred 유지
 - **상용 OTA 직접 크롤 금지** (ADR-008) — 스카이스캐너·구글 플라이트·카약 등. **스카이스캐너 검색 URL 생성만 허용** (`lib/skyscanner-url.ts`, ADR-027)
 - **범위**: 인천 출발 아시아 17 + 미국 3 = **20개 노선 고정** (ADR-021). 유럽·오세아니아·중동·남미 금지
 - **"역대가" 용어 금지** (ADR-012). 대체: 🔥 저점 / "시장 평균 대비 N% 할인" / "큰 폭 할인"
@@ -113,7 +113,7 @@ pnpm tsx scripts/cost_check.ts         # 비용 모니터
 pnpm tsx scripts/curate.ts             # Stretch 2: LLM 큐레이션
 pnpm tsx scripts/archive_daily.ts      # Stretch 2: 일별 TOP 5 아카이브
 pnpm tsx scripts/backfill.ts --seed-reload  # baseline_seed.json → route_market_data 재UPSERT
-# scripts/ingest_market.ts: ADR-022 Deprecated — Stretch 3 조건부 부활
+# scripts/ingest_market.ts: ADR-022 Rejected 2026-04-19 — 영구 미구현. 복원은 신규 ADR 로만
 ```
 
 ### 검증

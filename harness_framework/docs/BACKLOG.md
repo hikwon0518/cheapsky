@@ -24,6 +24,8 @@
 | 작성자 닉네임 저장·집계 | ADR-008 | 프라이버시, 기능 가치 낮음 |
 | 유럽·오세아니아·중동·남미 노선 | ADR-021 | 범위 축소, v2 검토 |
 | 김포·제주 출발 | ADR-021 | 동일 |
+| **외부 시세 API 통합 (Amadeus·Duffel·Kiwi·Travelpayouts·FlightAPI·Skyscanner Partner 등)** | **ADR-022 Rejected** | **GDS ≠ 핫딜 소스 (한국 핫딜은 GDS 밖 채널). "시장 baseline" 역할은 관측+시드가 이미 수행. 복원은 신규 ADR 로만 (ADR-022 Rollback 조건)** |
+| Phase 3 = 시세 API 재통합 (`3-stretch-market-api`) | ADR-026 재작성 | Phase 3 슬롯 재활용 → `3-community-expansion` 으로 대체 (ADR-030) |
 
 ---
 
@@ -44,20 +46,19 @@
 - GLOSSARY / OPERATIONS / LLM_PROMPTS 별도 문서
   - (DEMO_SCRIPT는 Core에서 README 인라인으로 편입됨, 별도 문서 불필요)
 
-**3-stretch-market-api** (외부 조건부, ADR-026):
-- 시세 API 재통합 — Amadeus 포털 재오픈 또는 ADR-008 ToS·비용 통과하는 대안 확보 시
-- `services/<market-api>.ts` 클라이언트 + `scripts/ingest_market.ts` + `route_market_data.source='api'`
-- 시세 히트맵 20개 노선 완전 커버
-- 신규 ADR 추가 (ADR-022 부활 또는 대안 결정)
-- **진입 전제**: API 가용성·요금·ToS 사전 확인 보고서 작성. 확인 없이 착수 금지
+**3-community-expansion** (차기 착수, ADR-030):
+- 클리앙 알뜰구매 크롤러 (항공권 태그 필터링)
+- 디시 항공권 갤러리 크롤러 (엄격 파서)
+- (조건부) 네이버 블로그 큐레이터 — 어미새 등, ADR-025 각 블로거별 재적용
+- 소스 교차 매칭 (`sources.length >= 3` → `social_signal='hot'` 승격)
+- `DealCard` 다중 소스 라벨 + `CrawlerHealth` 푸터 확장
+- **진입 전제**: 각 신규 소스별 robots.txt + ToS 개별 점검 (step0). 거부 시 해당 소스만 drop
 
 ### v2 데이터 소스
-- 클리앙 알뜰구매 크롤러
-- 디시 항공권 갤러리
-- 레드비쥬 / 어미새 / 와이키키 블로그
-- Secret Flying / The Flight Deal (해외, 한국 출발 필터링)
+- 레드비쥬 / 와이키키 블로그 (플레이윙즈 외 기타 큐레이션 블로거)
+- Secret Flying / The Flight Deal (해외 매체, 한국 출발 필터링 비용 대비 효용 낮음 → 사실상 보류)
 - 각 LCC 공식 특가 페이지 (ToS 개별 검토 필수)
-- **시세 API 대안 조사** (ADR-022 Deprecated 후속) — Amadeus 포털 재오픈 감시 / Travelpayouts·Kiwi Tequila·Duffel Sandbox 가용성 재평가 / 유료 플랜 ROI
+- ~~시세 API 대안 조사~~ → ADR-022 Rejected 로 영구 제외됨. 분기별 10분 타임박스 재검토만 유지 (무료·GDS 외 핫딜 데이터 API 등장 감지용, 자동 착수 아님)
 
 ### v2 범위 확장
 - 유럽 6개 노선 (CDG · FRA · FCO · BCN · AMS · LHR)

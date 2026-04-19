@@ -90,7 +90,7 @@ ANTHROPIC_API_KEY=
 LLM_DAILY_BUDGET=300
 ```
 
-**`AMADEUS_CLIENT_ID` / `AMADEUS_CLIENT_SECRET` 절대 추가하지 마라** (ADR-022 Deprecated).
+**`AMADEUS_CLIENT_ID` / `AMADEUS_CLIENT_SECRET` 절대 추가하지 마라** (ADR-022 Rejected 2026-04-19 — 외부 시세 API 영구 제외).
 
 ### 5) 디렉토리 스캐폴딩
 
@@ -145,7 +145,7 @@ pnpm lint      # ESLint 에러 없음 (warning 은 허용)
 - **Tailwind v4 설치 금지.** 이유: `CLAUDE.md` 기술 스택에 `Tailwind v3.x` 로 고정. v4 는 CSS-only config 방식이 달라 후속 step (UI_GUIDE 팔레트 주입) 과 깨진다
 - **LLM SDK 설치 금지** (ADR-005 Core). 이유: Core 단계 훅 `block_llm_deps.py` 가 차단하지만 훅 실패 가능성 대비 설계 레벨 방어
 - **전역 상태 라이브러리 설치 금지** (ADR-007). 이유: 필터는 URL 쿼리로만
-- **`AMADEUS_*` 환경변수 추가 금지** (ADR-022 Deprecated). 이유: Core 에 외부 시세 API 없음
-- **`src/services/amadeus.ts` 같은 파일 생성 금지** (ADR-022). 이유: Core 트랙 완수 후 Stretch 3 조건부
+- **`AMADEUS_*` 환경변수 추가 금지** (ADR-022 Rejected 2026-04-19). 이유: 외부 시세 API 영구 제외
+- **`src/services/amadeus.ts` 등 시세 클라이언트 파일 생성 금지** (ADR-022 Rejected). 이유: 복원은 신규 ADR 로만 가능
 - **`harness_framework/` 하위 파일 수정 금지**. 이유: 하네스 자기 자신
 - **`app/` 안에 `.env.local` 커밋 금지** (ADR-002). 이유: public repo 전제, service_role 키 유출 방지

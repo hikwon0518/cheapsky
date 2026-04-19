@@ -24,7 +24,7 @@
 ### ADR-002 [Core] 배치는 GitHub Actions Cron (Public Repo 전제)
 **결정**: crawl / ingest_market / verify / curate / archive / cost_check 모두 GH Actions cron. **Public repo 유지** 조건으로 분 할당량 무제한.
 **이유**: Vercel Cron Hobby 제한 회피, GH Actions 로그가 repo 탭에서 즉시 확인, 웹/배치 장애 격리, public이면 분 무료.
-**트레이드오프**: 비밀값 두 곳 설정. Public repo이므로 `.env.local`·service_role 키·Basic Auth 해시 절대 commit 금지.
+**트레이드오프**: 비밀값 두 곳 설정. Public repo이므로 `.env.local`·service_role 키·Share Token 절대 commit 금지.
 **Rollback 조건**: Repo를 private으로 전환해야 할 사유(민감 데이터 포함 등) 발생 시 cron 주기를 15분 → 30분으로 늘려 월 1,440분 한도 내 운영.
 
 ---
@@ -138,7 +138,7 @@
 2. **요청 간격 ≥ 1초**, 동시성 1
 3. **UA 투명**: `Cheapsky/0.1 (학습 프로젝트, +mailto:<연락처>)`. 위장 금지
 4. **저장 범위**: 제목·가격·링크·메타만 영구. 본문 7일 후 NULL. **작성자 닉네임 저장 안 함**
-5. **공개 차단**: Share Token OR Basic Auth (`middleware.ts`) + `X-Robots-Tag: noindex, nofollow` + `<meta>` 태그
+5. **공개 차단**: Share Token (`middleware.ts`) + `X-Robots-Tag: noindex, nofollow` + `<meta>` 태그
 6. **트래픽 환원**: 딜 카드 주 액션 = 원문 링크
 7. **고지**: 푸터 *"학습 프로젝트 · 원본 출처 링크로 접속해주세요"*
 8. **LLM 전송 제한 (ADR-005 교차)**: 폴백 → 제목 + 본문 앞 500자. 큐레이션 → 정제 필드만. 본문 전문 전송 금지
@@ -254,10 +254,20 @@
 
 ---
 
-### ADR-019 [Core] Share Token (Basic Auth 병용)
-**결정**: `SHARE_TOKENS` env에 콤마 분리 다중 토큰. `?t=<token>` URL로 인증. 실패 시 Basic Auth 폴백.
-**운영**: 토큰 3개 발급 (`friend`, `backup`, `debug`). 각 12자 이상 랜덤. 유출 의심 시 env rotate.
-**Rollback 조건**: 유출 1건이라도 발견 시 즉시 rotate + ShareButton 비활성. 평가 종료 후 env 비움.
+### ADR-019 [Core] Share Token 단일 경로 — Basic Auth 폴백 제거 (Updated 2026-04-19)
+**결정**: `SHARE_TOKENS` env에 콤마 분리 다중 토큰. `?t=<token>` URL로 인증. 쿠키 세션 7일.
+
+**변경 이력**:
+- 2026-04-18 최초: Share Token + Basic Auth 2단 폴백
+- **2026-04-19 업데이트**: Basic Auth 폴백 제거. 이유:
+  - bcrypt 해시 관리 비용 (사용자가 평문 비밀번호 잊을 위험)
+  - middleware 표면적 축소 (bcryptjs 의존성 제거, edge 호환성 개선)
+  - Share Token 3개 (friend/backup/debug) 만으로 친구 평가용 충분
+  - BASIC_AUTH_USER/PASS env 제거로 Vercel 배포 설정 단순화
+
+**운영**: 토큰 3개 발급 (`friend`, `backup`, `debug`). 각 12자 이상 랜덤. 유출 의심 시 `SHARE_TOKENS` env rotate.
+
+**Rollback 조건**: 유출 1건이라도 발견 시 즉시 rotate + ShareButton 비활성. Basic Auth 재도입 필요 시 신규 ADR.
 
 ---
 

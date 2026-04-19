@@ -23,6 +23,7 @@ import {
   type PriceObservationRow,
   type PriceTraceBody,
 } from '@/lib/price-trace';
+import { checkRate, extractIp } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -34,12 +35,32 @@ type DealRow = {
 };
 
 export async function GET(
-  _req: Request,
+  req: Request,
   ctx: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await ctx.params;
 
   const empty: PriceTraceBody = { points: [], lowest: null, highest: null };
+
+  // Rate limit: IP 당 60 req/min. burst 방어용 1차 게이트.
+  const ip = extractIp(req);
+  const rl = checkRate(ip);
+  if (!rl.allowed) {
+    return new Response(
+      JSON.stringify({ error: 'rate limited', resetAt: rl.resetAt }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Retry-After': String(
+            Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000)),
+          ),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(Math.floor(rl.resetAt / 1000)),
+        },
+      },
+    );
+  }
 
   // uuid 형태가 아니면 바로 빈 응답. (잘못 호출된 요청에서 DB 왕복 방지)
   if (!id || !/^[0-9a-fA-F-]{8,40}$/.test(id)) {

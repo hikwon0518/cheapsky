@@ -2,11 +2,10 @@
 
 // Tweaks 플로팅 패널 (Cheapsky Light v5, dev-only).
 //
-// 우하단 floating 버튼 → 패널 토글. localStorage 저장 + cookie.
+// 우하단 floating 버튼 → 패널 토글. localStorage 저장.
 // 프로덕션 빌드에서는 NODE_ENV !== 'production' 으로 렌더 생략.
 //
 // 현재 토글:
-//   - 언어 (ko/ja/en) — cookie `cheapsky_lang`
 //   - Density (regular/comfy) — data-density attribute
 //   - CTA 모드 (hover/always) — data-ctas attribute
 //
@@ -17,8 +16,6 @@
 
 import { useEffect, useState } from 'react';
 
-import { getLangFromCookie, setLangCookie, type Lang } from '@/lib/i18n';
-
 type Density = 'regular' | 'comfy';
 type CtaMode = 'hover' | 'always';
 
@@ -27,13 +24,11 @@ const TWEAKS_KEY = 'cheapsky_tweaks';
 type TweaksState = {
   density: Density;
   ctaMode: CtaMode;
-  lang: Lang;
 };
 
 const DEFAULT_STATE: TweaksState = {
   density: 'regular',
   ctaMode: 'hover',
-  lang: 'ko',
 };
 
 function loadTweaks(): TweaksState {
@@ -44,7 +39,6 @@ function loadTweaks(): TweaksState {
     return {
       density: saved.density === 'comfy' ? 'comfy' : 'regular',
       ctaMode: saved.ctaMode === 'always' ? 'always' : 'hover',
-      lang: getLangFromCookie(),
     };
   } catch {
     return DEFAULT_STATE;
@@ -54,10 +48,7 @@ function loadTweaks(): TweaksState {
 function saveTweaks(s: TweaksState): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(
-      TWEAKS_KEY,
-      JSON.stringify({ density: s.density, ctaMode: s.ctaMode }),
-    );
+    window.localStorage.setItem(TWEAKS_KEY, JSON.stringify(s));
   } catch {
     // ignore
   }
@@ -80,9 +71,6 @@ export function TweaksPanel() {
     setState(merged);
     saveTweaks(merged);
     applyState(merged);
-    if (next.lang && next.lang !== state.lang) {
-      setLangCookie(next.lang);
-    }
   };
 
   if (!mounted) return null;
@@ -109,7 +97,7 @@ export function TweaksPanel() {
         <aside
           role="region"
           aria-label="개발자 Tweaks"
-          className="fixed right-[16px] bottom-[128px] md:bottom-[56px] z-[60] w-[290px] bg-surface border border-line-2 rounded-xl p-[14px] shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)] max-h-[72vh] overflow-auto"
+          className="fixed right-[16px] bottom-[128px] md:bottom-[56px] z-[60] w-[260px] bg-surface border border-line-2 rounded-xl p-[14px] shadow-[0_20px_40px_-20px_rgba(0,0,0,0.18)] max-h-[72vh] overflow-auto"
         >
           <header className="flex items-center justify-between mb-2">
             <span className="text-[11.5px] text-ink-3 uppercase tracking-wider font-medium">
@@ -124,18 +112,6 @@ export function TweaksPanel() {
               ✕
             </button>
           </header>
-
-          <Row label="언어">
-            <Segmented
-              options={[
-                { value: 'ko', label: '한' },
-                { value: 'ja', label: '日' },
-                { value: 'en', label: 'EN' },
-              ]}
-              value={state.lang}
-              onChange={(v) => apply({ lang: v as Lang })}
-            />
-          </Row>
 
           <Row label="밀도">
             <Segmented
@@ -160,8 +136,7 @@ export function TweaksPanel() {
           </Row>
 
           <p className="text-[10.5px] text-ink-4 leading-relaxed mt-3">
-            프로덕션 빌드에서는 이 패널이 렌더링되지 않습니다. 언어 변경 시
-            페이지 새로고침이 필요할 수 있어요.
+            프로덕션 빌드에서는 이 패널이 렌더링되지 않습니다.
           </p>
         </aside>
       ) : null}

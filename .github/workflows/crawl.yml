@@ -17,6 +17,12 @@ on:
     - cron: '*/15 * * * *'
   workflow_dispatch:
 
+# 이전 run 이 15분 이상 돌면 다음 스케줄이 trigger 되는데, 동시 실행 방지
+# (Supabase 중복 insert, 1초 간격 정책 위반 등).
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   crawl:
     runs-on: ubuntu-latest

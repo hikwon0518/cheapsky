@@ -10,7 +10,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, Heart, Home as HomeIcon, Settings } from 'lucide-react';
+import { Bell, Heart, Home as HomeIcon } from 'lucide-react';
 
 type Tab = {
   id: string;
@@ -23,7 +23,6 @@ const TABS: readonly Tab[] = [
   { id: 'home', label: '홈', href: '/', Icon: HomeIcon },
   { id: 'saved', label: '찜', href: '/saved', Icon: Heart },
   { id: 'alerts', label: '알림', href: '/alerts', Icon: Bell },
-  { id: 'settings', label: '설정', href: '/settings', Icon: Settings },
 ];
 
 export function MobileTabBar() {

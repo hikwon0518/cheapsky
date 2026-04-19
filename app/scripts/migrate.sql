@@ -179,12 +179,21 @@ create policy anon_read_obs    on price_observations for select using (true);
 drop policy if exists anon_read_runs   on crawler_runs;
 create policy anon_read_runs   on crawler_runs       for select using (true);
 
+-- 2026-04-19: 운영 메타데이터 (검증 이력 · LLM 비용) anon 접근 제거 (ADR-008 강화).
+-- UI 는 /api/health 에서 service_role 또는 server-side 만 읽음.
 drop policy if exists anon_read_ver    on deal_verifications;
-create policy anon_read_ver    on deal_verifications for select using (true);
+-- anon 읽기 정책 생성 안 함 → anon 은 bulk export 불가
 
 drop policy if exists anon_read_arch   on archive_snapshots;
 create policy anon_read_arch   on archive_snapshots  for select using (true);
 
 drop policy if exists anon_read_usage  on api_usage_daily;
-create policy anon_read_usage  on api_usage_daily    for select using (true);
+-- anon 읽기 정책 생성 안 함
+
 -- 쓰기 정책 없음 → service_role 만 가능
+
+-- ============================================================
+-- Column-level GRANT: deals.body 는 anon 에서 제외 (2026-04-19 ADR-008 강화).
+-- 본문 7일 TTL 이라도 대량 덤프 금지.
+-- ============================================================
+revoke select (body) on deals from anon;

@@ -55,9 +55,6 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://ci.example.com
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
           SUPABASE_SERVICE_ROLE_KEY: ci-service-role
-          BASIC_AUTH_USER: ci
-          BASIC_AUTH_PASS: $2b$10$ci-dummy-hash
-          SHARE_TOKENS: ci_dummy_token
           CRAWLER_USER_AGENT: Cheapsky-CI/0.1
 
   harness:

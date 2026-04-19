@@ -1,0 +1,40 @@
+# Cheapsky — workflow 실패 알림 dispatcher.
+#
+# 다른 workflow (crawl · verify · curate · archive_daily · cost_check · ci) 가
+# 실패 결과로 완료되면 이 workflow 가 trigger 돼서 ALERT_WEBHOOK (Discord/Slack) 으로 알림.
+#
+# secrets.ALERT_WEBHOOK 이 비어있으면 silent skip.
+
+name: notify-failure
+
+on:
+  workflow_run:
+    workflows:
+      - crawl
+      - verify
+      - curate
+      - archive_daily
+      - cost_check
+      - ci
+    types: [completed]
+
+jobs:
+  notify:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post webhook
+        env:
+          WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+          WF_NAME: ${{ github.event.workflow_run.name }}
+          WF_URL: ${{ github.event.workflow_run.html_url }}
+          WF_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WF_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "ALERT_WEBHOOK 미설정 — skip"
+            exit 0
+          fi
+          curl -fsS -H "Content-Type: application/json" \
+            -d "{\"content\":\"🚨 Cheapsky workflow \\\`${WF_NAME}\\\` 실패 (${WF_BRANCH} @ ${WF_SHA:0:7}) → ${WF_URL}\"}" \
+            "$WEBHOOK" || echo "webhook post failed (non-fatal)"

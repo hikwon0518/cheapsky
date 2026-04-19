@@ -53,10 +53,9 @@ export function Timeline({
           <span
             className="inline-block w-1.5 h-1.5 rounded-full bg-low"
             aria-hidden="true"
-            style={{ animation: 'pulse 1.5s infinite' }}
           />
           <span className="text-[10.5px] text-low uppercase tracking-wide">
-            Live
+            실시간
           </span>
         </div>
       </header>

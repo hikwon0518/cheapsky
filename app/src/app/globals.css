@@ -273,12 +273,4 @@ body {
   }
 }
 
-/* Pulse for LIVE dots on Timeline / Counter */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.45;
-  }
-}
+/* NB: LIVE dot pulse removed 2026-04-19 — UI_GUIDE '무한 반복 금지' 규칙 적용. */

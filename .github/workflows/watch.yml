@@ -1,19 +1,13 @@
-# Cheapsky — 딜 실효성 검증 (Core, ADR-018 HEAD only).
+# Cheapsky — 노선 감시 cron (C1 2026-04-19).
 #
-# cron: 매 3 시간. 24h+ 딜을 원문 재방문해 active/snapshot 판정.
-# 로컬 재실행:
-#   cd app && pnpm tsx scripts/verify.ts
-#
-# Hard red lines:
-#   - CHEAPSKY_STAGE 설정 금지 (Core, 훅 게이트).
-#   - GET + 가격 패턴 검출은 Stretch 2 범위. 여기선 HEAD 만.
+# cron: 매 시 :45 (crawl 15분 간격·curate :30 과 겹치지 않게 여유).
+# 매칭되면 이메일 발송 (Resend). RESEND_API_KEY 미설정 시 console log only.
 
-name: verify
+name: watch
 
 on:
   schedule:
-    # 3 시간 주기 (UTC). ADR-018.
-    - cron: '0 */3 * * *'
+    - cron: '45 * * * *'
   workflow_dispatch:
 
 concurrency:
@@ -21,9 +15,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  verify:
+  watch:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     defaults:
       run:
         working-directory: app
@@ -43,14 +37,14 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: app/pnpm-lock.yaml
 
-      - name: Install dependencies
+      - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Run verify
-        run: pnpm tsx scripts/verify.ts
+      - name: Run watch
+        run: pnpm tsx scripts/watch.ts
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-          CRAWLER_USER_AGENT: ${{ secrets.CRAWLER_USER_AGENT }}
-          # CHEAPSKY_STAGE: 설정하지 않음 (Core gate).
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          WATCHER_FROM_EMAIL: ${{ secrets.WATCHER_FROM_EMAIL }}
+          WATCHER_OWNER_EMAIL: ${{ secrets.WATCHER_OWNER_EMAIL }}

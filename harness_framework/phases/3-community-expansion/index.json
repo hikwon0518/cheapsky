@@ -1,0 +1,60 @@
+{
+  "project": "cheapsky",
+  "phase": "3-community-expansion",
+  "adr_basis": ["ADR-022 Rejected 2026-04-19", "ADR-026 재작성 2026-04-19", "ADR-030 신규 2026-04-19"],
+  "description": "커뮤니티 소스 확장 (클리앙 · 디시 · 조건부 네이버 블로그) + 소스 교차 매칭으로 핫딜 감지력 강화. Phase 3 슬롯은 이전 '3-stretch-market-api' 에서 재할당 (ADR-022 Rejected).",
+  "prereqs": {
+    "completed_phases": ["0-core-mvp", "1-stretch-sources", "2-stretch-enhancements"],
+    "hard_blockers": [
+      "각 신규 소스의 robots.txt 에서 해당 게시판 경로 허용 여부 (step0 점검)",
+      "각 신규 소스 ToS 에 자동화 수집 금지 명시 여부 (명시 있으면 해당 소스 drop)",
+      "UA 업데이트 0.1 → 0.2 (개인+지인 실사용 프레임 반영)"
+    ]
+  },
+  "steps": [
+    {
+      "step": 0,
+      "name": "preflight-tos-fixtures",
+      "status": "pending",
+      "summary": "신규 소스 2~3곳의 robots.txt · ToS · rate limit 정책 점검. 통과한 소스만 대상으로 fixture HTML 수집 (__fixtures__/clien-list.html, dcinside-list.html, 필요 시 naver-blog-{blogger}-list.html). UA 상수 v0.2 반영. 실패한 소스는 BACKLOG 로 되돌리고 phase 범위 축소."
+    },
+    {
+      "step": 1,
+      "name": "clien-crawler",
+      "status": "pending",
+      "summary": "services/crawlers/clien.ts 구현 (알뜰구매 게시판 항공권 태그 필터 · ADR-008 동일 요청 간격 ≥1초 + 동시성 1 · 순수 함수 (config) => RawPost[]). scripts/crawl.ts 에 source='clien' 통합 + crawler_runs 기록. fixture 회귀 테스트."
+    },
+    {
+      "step": 2,
+      "name": "dcinside-crawler",
+      "status": "pending",
+      "summary": "services/crawlers/dcinside.ts 구현 (airplane_new2 갤러리 리스트 크롤러, 노이즈 필터링 엄격 파서 — 개드립/오타/agenda 제외). scripts/crawl.ts 에 source='dcinside' 통합. fixture 회귀 테스트. 파싱 실패는 LLM 폴백 재사용 (Stretch 2 기존)."
+    },
+    {
+      "step": 3,
+      "name": "cross-source-matching",
+      "status": "pending",
+      "summary": "dedupe 쿼리 레이어에서 sources 배열 확장 (최대 6 엔트리). sources.length >= 3 일 때 social_signal='hot' 강제 부여 (기존 socialSignal 규칙과 OR). DealCard 에 다중 소스 라벨 렌더 (60자 cut). 테스트: 2 소스 = hot 미부여, 3 소스 = hot 부여 경계."
+    },
+    {
+      "step": 4,
+      "name": "crawler-health-ui-docs",
+      "status": "pending",
+      "summary": "CrawlerHealth 컴포넌트에 clien/dcinside 점 추가 (기존 ppomppu/ruliweb/playwings 3개 → 5개). services/home-queries.ts loadCrawlerHealth 가 모든 source 반환. crawler_runs.source check 제약 완화 ('clien','dcinside' 추가, 신규 migration). app/README.md Stretch 3 섹션 완료로 갱신. OPERATIONS.md 주기 작업 표 · GLOSSARY.md 소스 정의 추가."
+    },
+    {
+      "step": 5,
+      "name": "naver-blog-conditional",
+      "status": "pending",
+      "optional": true,
+      "summary": "(선택) 네이버 블로그 큐레이터 크롤러. ADR-025 절차 각 블로거별 재적용 — RSS 탐색 우선 → 메일 통보 → 10 영업일 대기. LLM 기반 제목 추출 (Stretch 2 curator 재활용). 응답/동의 없으면 phase 완료 전까지 step skip · BACKLOG 로 복귀."
+    }
+  ],
+  "exit_criteria": [
+    "pnpm test · pnpm typecheck · pnpm lint 전부 통과",
+    "neue crawler_runs 테이블에 clien/dcinside 실행 기록 존재 (실 크롤 확인)",
+    "DealCard 에 3+ 소스 교차 딜이 있으면 'N곳 동시 등장' 라벨 렌더",
+    "CrawlerHealth 5점 표시 (ppomppu/ruliweb/playwings/clien/dcinside)",
+    "docs 동기화 (ADR 의존 지도 + README + OPERATIONS + GLOSSARY)"
+  ]
+}

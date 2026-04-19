@@ -384,23 +384,38 @@ class TestBlockSecretWrites:
 # ---------------------------------------------------------------------------
 
 class TestBlockDeprecatedTargets:
+    """ADR-022 Rejected 2026-04-19: 외부 시세 API 영구 제외. 모든 단계에서 차단.
+    과거 `CHEAPSKY_STAGE=stretch3` escape hatch 는 제거됨 (stretch3 는 더 이상 유효한 stage 가 아님).
+    복원은 신규 ADR 로만 가능 (ADR-022 Rollback 조건).
+    """
     @pytest.mark.parametrize("path", [
         "src/services/amadeus.ts",
         "services/amadeus/client.ts",
         "src/services/kiwi.ts",
         "src/services/travelpayouts.ts",
+        "src/services/duffel.ts",
+        "src/services/flightapi.ts",
+        "src/services/skyscanner.ts",
+        "src/services/serpapi.ts",
     ])
-    def test_blocks_amadeus_paths_in_core(self, path):
-        r = run_hook("block_deprecated_targets.py",
-                     write_payload(path, "export const client = {}"),
-                     env={"CHEAPSKY_STAGE": "core"})
-        assert r.returncode == 2, f"expected block: {path}"
+    def test_blocks_rejected_paths_in_all_stages(self, path):
+        # Core · Stretch 어느 단계에서도 차단되어야 함 (Rejected 는 영구 제외)
+        for stage in ("core", "stretch", "stretch3"):
+            r = run_hook("block_deprecated_targets.py",
+                         write_payload(path, "export const client = {}"),
+                         env={"CHEAPSKY_STAGE": stage})
+            assert r.returncode == 2, f"expected block: {path} (stage={stage})"
 
-    def test_stretch3_allows_amadeus(self):
-        r = run_hook("block_deprecated_targets.py",
-                     write_payload("src/services/amadeus.ts", "export {}"),
-                     env={"CHEAPSKY_STAGE": "stretch3"})
-        assert r.returncode == 0
+    def test_allows_community_expansion_sources(self):
+        """Phase 3 (ADR-030) 허용 커뮤니티 소스는 통과."""
+        for path in (
+            "src/services/crawlers/clien.ts",
+            "src/services/crawlers/dcinside.ts",
+            "src/services/crawlers/naver_blog.ts",
+        ):
+            r = run_hook("block_deprecated_targets.py",
+                         write_payload(path, "export {}"))
+            assert r.returncode == 0, f"expected allow: {path}"
 
     @pytest.mark.parametrize("content", [
         "const r = await fetch('https://www.skyscanner.net/flights')",

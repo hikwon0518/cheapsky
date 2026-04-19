@@ -93,3 +93,41 @@ export function applyPreset(filters: Filters, preset: PresetDef): Filters {
   }
   return { ...DEFAULT_FILTERS, ...preset.set } as Filters;
 }
+
+const FILTER_PARAM_KEYS = [
+  'region',
+  'maxPrice',
+  'month',
+  'minDiscount',
+  'since',
+] as const;
+
+/**
+ * Preset 클릭 href 계산. `<Link>` 로 즉시 네비게이션하기 위함.
+ * - 이미 active → 필터 param 제거 (나머지 쿼리는 보존)
+ * - 비활성 → preset.set 을 URL param 으로 변환 + 비-filter 쿼리 보존
+ */
+export function presetHref(
+  current: Filters,
+  preset: PresetDef,
+  searchParams: URLSearchParams | null | undefined,
+): string {
+  const next = applyPreset(current, preset);
+  const params = new URLSearchParams();
+  if (next.region !== 'all') params.set('region', next.region);
+  if (next.maxPrice !== null) params.set('maxPrice', String(next.maxPrice));
+  if (next.month) params.set('month', next.month);
+  if (next.minDiscount > 0) params.set('minDiscount', String(next.minDiscount));
+  if (next.since !== 'all') params.set('since', next.since);
+
+  if (searchParams) {
+    for (const [k, v] of searchParams.entries()) {
+      if (!(FILTER_PARAM_KEYS as readonly string[]).includes(k)) {
+        params.append(k, v);
+      }
+    }
+  }
+
+  const qs = params.toString();
+  return qs ? `/?${qs}` : '/';
+}

@@ -164,19 +164,45 @@ async function loadData(filters: Filters, now: Date): Promise<DataBundle> {
   }
 
   const nowIso = now.toISOString();
+  // "지나간 특가" 제외 — depart_from 이 오늘 이전이면 여행 날짜가 지나간 딜.
+  // 단 depart_from 이 null (파서 실패) 이면 허용 (불명확한 경우는 노출).
+  // Supabase `or` 문법: `depart_from.is.null,depart_from.gte.<today>`
+  const todayIso = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  ).toISOString();
+  const DEPART_FUTURE_OR_NULL = `depart_from.is.null,depart_from.gte.${todayIso}`;
 
-  // 1) heroTop3 — 활성 핫딜 상위 3.
+  const regionDests =
+    filters.region !== 'all'
+      ? [...REGION_TO_DESTINATIONS[filters.region]]
+      : null;
+  const sinceDate = sinceCutoff(filters.since, now);
+  const monthWin = filters.month ? monthWindow(filters.month) : null;
+
+  // 1) heroTop3 — 활성 핫딜 상위 3. 현재 필터 적용 (사용자가 JP preset 시 Hero 도 JP 만).
   let heroTop3: Deal[] = [];
   try {
-    const res = await client
+    let q = client
       .from('deals')
       .select(DEAL_COLUMNS)
       .eq('hot_deal', true)
       .eq('verification_status', 'active')
       .gt('expires_at', nowIso)
+      .or(DEPART_FUTURE_OR_NULL)
       .gte('price_krw', 30000)
       .order('discount_rate', { ascending: false, nullsFirst: false })
       .limit(3);
+    if (regionDests) q = q.in('destination', regionDests);
+    if (filters.maxPrice !== null) q = q.lte('price_krw', filters.maxPrice);
+    if (filters.minDiscount > 0)
+      q = q.gte('discount_rate', filters.minDiscount / 100);
+    if (sinceDate) q = q.gte('posted_at', sinceDate.toISOString());
+    if (monthWin) {
+      q = q
+        .gte('depart_from', monthWin.startUtc.toISOString())
+        .lt('depart_from', monthWin.endUtc.toISOString());
+    }
+    const res = await q;
     if (!res.error && res.data) {
       heroTop3 = (res.data as DealRow[]).map(rowToDeal);
     }
@@ -184,20 +210,31 @@ async function loadData(filters: Filters, now: Date): Promise<DataBundle> {
     heroTop3 = [];
   }
 
-  // 2) heroTop3 비면 최근 7일 TOP 3 폴백.
+  // 2) heroTop3 비면 최근 7일 TOP 3 폴백. 동일 필터 적용.
   if (heroTop3.length === 0) {
     const sevenDaysAgo = new Date(
       now.getTime() - 7 * 24 * 60 * 60 * 1000,
     ).toISOString();
     try {
-      const res = await client
+      let q = client
         .from('deals')
         .select(DEAL_COLUMNS)
         .gte('posted_at', sevenDaysAgo)
         .neq('verification_status', 'snapshot')
+        .or(DEPART_FUTURE_OR_NULL)
         .gte('price_krw', 30000)
         .order('discount_rate', { ascending: false, nullsFirst: false })
         .limit(3);
+      if (regionDests) q = q.in('destination', regionDests);
+      if (filters.maxPrice !== null) q = q.lte('price_krw', filters.maxPrice);
+      if (filters.minDiscount > 0)
+        q = q.gte('discount_rate', filters.minDiscount / 100);
+      if (monthWin) {
+        q = q
+          .gte('depart_from', monthWin.startUtc.toISOString())
+          .lt('depart_from', monthWin.endUtc.toISOString());
+      }
+      const res = await q;
       if (!res.error && res.data) {
         heroTop3 = (res.data as DealRow[]).map(rowToDeal);
       }
@@ -211,15 +248,19 @@ async function loadData(filters: Filters, now: Date): Promise<DataBundle> {
   //    뒤집어 unstable 을 피하려고 여기서 수동 정렬).
   let communityPicks: Deal[] = [];
   try {
-    const res = await client
+    let q = client
       .from('deals')
       .select(DEAL_COLUMNS)
       .not('social_signal', 'is', null)
       .eq('verification_status', 'active')
       .gt('expires_at', nowIso)
+      .or(DEPART_FUTURE_OR_NULL)
       .gte('price_krw', 30000)
       .order('posted_at', { ascending: false })
       .limit(16);
+    if (regionDests) q = q.in('destination', regionDests);
+    if (filters.maxPrice !== null) q = q.lte('price_krw', filters.maxPrice);
+    const res = await q;
     if (!res.error && res.data) {
       const rows = (res.data as DealRow[]).map(rowToDeal);
       const rank = (s: 'hot' | 'trending' | null) =>
@@ -243,13 +284,13 @@ async function loadData(filters: Filters, now: Date): Promise<DataBundle> {
       .select(DEAL_COLUMNS)
       .gt('expires_at', nowIso)
       .neq('verification_status', 'snapshot')
+      .or(DEPART_FUTURE_OR_NULL)
       .gte('price_krw', 30000)
       .order('posted_at', { ascending: false })
       .limit(50);
 
-    if (filters.region !== 'all') {
-      const dests = REGION_TO_DESTINATIONS[filters.region];
-      q = q.in('destination', [...dests]);
+    if (regionDests) {
+      q = q.in('destination', regionDests);
     }
     if (filters.maxPrice !== null) {
       q = q.lte('price_krw', filters.maxPrice);
@@ -257,16 +298,13 @@ async function loadData(filters: Filters, now: Date): Promise<DataBundle> {
     if (filters.minDiscount > 0) {
       q = q.gte('discount_rate', filters.minDiscount / 100);
     }
-    const sinceDate = sinceCutoff(filters.since, now);
     if (sinceDate) {
       q = q.gte('posted_at', sinceDate.toISOString());
     }
-    if (filters.month) {
-      const win = monthWindow(filters.month);
-      if (win) {
-        q = q.gte('depart_from', win.startUtc.toISOString());
-        q = q.lt('depart_from', win.endUtc.toISOString());
-      }
+    if (monthWin) {
+      q = q
+        .gte('depart_from', monthWin.startUtc.toISOString())
+        .lt('depart_from', monthWin.endUtc.toISOString());
     }
     const res = await q;
     if (!res.error && res.data) {
@@ -327,6 +365,7 @@ async function loadData(filters: Filters, now: Date): Promise<DataBundle> {
       )
       .lte('discount_rate', -0.1)
       .gt('expires_at', nowIso)
+      .or(DEPART_FUTURE_OR_NULL)
       .gte('posted_at', sevenDaysAgo)
       .neq('verification_status', 'snapshot')
       .order('discount_rate', { ascending: true })

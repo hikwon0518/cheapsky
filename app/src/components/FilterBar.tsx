@@ -1,6 +1,7 @@
 'use client';
 
 // 필터 바 (ADR-007, ADR-020) — `useSearchParams` + `router.replace` + 300ms debounce.
+// Preset chip 은 `<Link>` 로 즉시 네비게이션 (router.replace 가 Suspense 경계에서 실패하는 이슈 회피).
 // **전역 상태 라이브러리 금지** — Zustand/Redux/SWR/TanStack Query 전부 사용 안 함.
 //
 // 5 필터 (ADR-020):
@@ -13,6 +14,7 @@
 // 모바일 < 640px: FilterDrawer bottom-sheet 로 수납. 이 파일 내부에 포함.
 // 초기화 버튼: 기본값일 때 disabled.
 
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -29,7 +31,12 @@ import {
   type RegionCode,
   type SinceCode,
 } from '@/lib/filters';
-import { applyPreset, getPresets, presetActive } from '@/lib/presets';
+import {
+  applyPreset,
+  getPresets,
+  presetActive,
+  presetHref,
+} from '@/lib/presets';
 
 const REGION_CODES: readonly RegionCode[] = [
   'all',
@@ -211,6 +218,8 @@ function FilterInner({
   );
 }
 
+const FILTER_KEYS = ['region', 'maxPrice', 'month', 'minDiscount', 'since'] as const;
+
 export function FilterBar({ initial }: { initial: Filters }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -219,6 +228,23 @@ export function FilterBar({ initial }: { initial: Filters }) {
   // 상세 필터 기본 접힘. v5 "+ 자세히 설정" 토글.
   const [detailOpen, setDetailOpen] = useState(false);
   const presets = useMemo(() => getPresets(), []);
+
+  // Filters → URL 동기. preset 클릭 같은 즉시 반영이 필요할 때 호출.
+  const applyFiltersToUrl = (next: Filters) => {
+    const q = serializeFilters(next).toString();
+    const preserved = new URLSearchParams();
+    if (searchParams) {
+      for (const [k, v] of searchParams.entries()) {
+        if (!(FILTER_KEYS as readonly string[]).includes(k)) {
+          preserved.append(k, v);
+        }
+      }
+    }
+    const combined = new URLSearchParams(q);
+    for (const [k, v] of preserved.entries()) combined.append(k, v);
+    const qStr = combined.toString();
+    router.replace(qStr ? `/?${qStr}` : '/', { scroll: false });
+  };
 
   // URL 이 외부에서 바뀌었을 때 동기화 (Back/Forward, 초기 로드).
   useEffect(() => {
@@ -285,11 +311,14 @@ export function FilterBar({ initial }: { initial: Filters }) {
         </span>
         {presets.map((p) => {
           const active = presetActive(filters, p);
+          const href = presetHref(filters, p, searchParams);
           return (
-            <button
+            <Link
               key={p.id}
-              type="button"
-              onClick={() => setFilters(applyPreset(filters, p))}
+              href={href}
+              replace
+              scroll={false}
+              prefetch={false}
               data-on={active ? 'true' : 'false'}
               className="preset shrink-0"
               aria-pressed={active}
@@ -298,7 +327,7 @@ export function FilterBar({ initial }: { initial: Filters }) {
                 <span aria-hidden="true">{p.prefix}</span>
               ) : null}
               <span>{p.label}</span>
-            </button>
+            </Link>
           );
         })}
         <button

@@ -244,25 +244,17 @@ body {
   color: var(--ink);
 }
 
-/* card-ctas — Hero 만 hover 시 노출 */
+/* card-ctas — Hero 카드 CTA 항상 표시 (v5 의 hover-only 은 사용자 발견 실패 → 항상 visible).
+ * 약간의 opacity/translate transition 은 유지해서 페이드 인 효과. */
 .card-ctas {
-  opacity: 0;
-  transform: translateY(4px);
-  transition: all 0.15s;
-  pointer-events: none;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition: opacity 0.15s;
 }
 .deal:hover .card-ctas,
 .deal:focus-within .card-ctas {
   opacity: 1;
-  transform: none;
-  pointer-events: auto;
-}
-@media (hover: none) {
-  .card-ctas {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

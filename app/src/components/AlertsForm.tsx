@@ -83,7 +83,7 @@ export function AlertsForm() {
           </span>
           <input
             type="number"
-            min={30000}
+            min={50000}
             max={10_000_000}
             step={10_000}
             value={maxPrice}

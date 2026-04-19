@@ -8,7 +8,7 @@ create table if not exists watched_routes (
   owner_email         text not null,
   origin              text not null,
   destination         text not null,
-  max_price_krw       integer not null check (max_price_krw > 0),
+  max_price_krw       integer not null check (max_price_krw >= 50000 and max_price_krw <= 10000000),
   carrier_class       text not null default 'mixed' check (carrier_class in ('fsc','lcc','mixed')),
   depart_month        text check (depart_month is null or depart_month ~ '^\d{4}-\d{2}$'),
   active              boolean not null default true,

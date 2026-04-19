@@ -35,6 +35,7 @@ const SOURCE_LABEL: Record<Source, string> = {
   ppomppu: '뽐뿌',
   ruliweb: '루리웹',
   playwings: '플레이윙즈',
+  clien: '클리앙',
 };
 
 type DealCardProps = {

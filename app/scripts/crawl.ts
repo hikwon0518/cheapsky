@@ -48,6 +48,7 @@ import {
   crawlRuliweb,
   crawlRuliwebWithSignals,
 } from '@/services/crawlers/ruliweb';
+import { crawlClien } from '@/services/crawlers/clien';
 import type { Crawler, ParsedListItem } from '@/services/crawlers/types';
 import { parseRules } from '@/services/parser/rules';
 import {
@@ -116,9 +117,11 @@ type DealRow = {
 };
 
 /**
- * 한 회차에서 실행할 소스 묶음. 순서 유지 (ppomppu → ruliweb → playwings).
+ * 한 회차에서 실행할 소스 묶음. 순서 유지 (ppomppu → ruliweb → playwings → clien).
  * playwings 는 ADR-025 방어 조항 준수 — 구조화 피드(sitemap) 우선, 본문 500자 cut,
  * 작성자 미수집, 운영자 이의 제기 시 즉시 비활성 (운영 절차).
+ * clien (Stretch 3, ADR-030): 알뜰구매 게시판 항공권 밀도가 낮지만 교차 매칭 N=3
+ * 승격에 기여하는 4번째 소스.
  */
 type SourceEntry = {
   source: Source;
@@ -134,6 +137,7 @@ const SOURCES: SourceEntry[] = [
   { source: 'ppomppu', crawler: crawlPpomppu },
   { source: 'ruliweb', crawler: crawlRuliweb, collectSocialSignal: true },
   { source: 'playwings', crawler: crawlPlaywings },
+  { source: 'clien', crawler: crawlClien },
 ];
 
 function requireEnv(name: string): string {

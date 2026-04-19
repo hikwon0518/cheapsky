@@ -8,6 +8,7 @@ const LABEL: Record<Source, string> = {
   ppomppu: 'PPOMPPU',
   ruliweb: 'RULIWEB',
   playwings: 'PLAYWINGS',
+  clien: 'CLIEN',
 };
 
 export function SourceTag({ sources }: { sources: readonly Source[] }) {

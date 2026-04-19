@@ -1,11 +1,13 @@
 // Cheapsky 데이터 모델 (docs/ARCHITECTURE.md "데이터 모델" 그대로 TS 이식).
 //
-// 주의 (ADR-022 Deprecated 2026-04-18):
-// - `Source` 는 커뮤니티/블로그 소스만. amadeus 같은 외부 API 소스 금지.
-// - `RouteMarketData.source` 는 'seed' | 'observed' 두 개뿐.
-//   Stretch 3-stretch-market-api 진입 + 신규 ADR 승인 전까지 'api' 유니온 추가 금지.
+// 주의 (ADR-022 Rejected 2026-04-19, ADR-030 Phase 3 2026-04-19):
+// - `Source` 는 커뮤니티/블로그 소스만. amadeus · duffel · kiwi 등 외부 시세 API 소스는
+//   영구 금지 (ADR-022 Rejected).
+// - `RouteMarketData.source` 는 'seed' | 'observed' 두 개뿐. 복원은 신규 ADR 로만.
+// - Phase 3 (3-community-expansion) 에서 'clien' 추가 (ADR-030). 디시는 robots.txt
+//   차단으로 영구 skip (step0 preflight 2026-04-20).
 
-export type Source = 'ppomppu' | 'ruliweb' | 'playwings';
+export type Source = 'ppomppu' | 'ruliweb' | 'playwings' | 'clien';
 
 export type CarrierClass = 'fsc' | 'lcc' | 'mixed';
 

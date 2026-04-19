@@ -58,7 +58,7 @@ async function findMatchingDeal(
     .eq('verification_status', 'active')
     .gt('expires_at', new Date().toISOString())
     .lte('price_krw', route.max_price_krw)
-    .gte('price_krw', 30_000)
+    .gte('price_krw', 50_000)
     .order('price_krw', { ascending: true })
     .limit(1);
 

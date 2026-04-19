@@ -74,9 +74,9 @@ export async function POST(req: Request): Promise<Response> {
       { status: 400 },
     );
   }
-  if (!Number.isFinite(maxPrice) || maxPrice < 30000 || maxPrice > 10_000_000) {
+  if (!Number.isFinite(maxPrice) || maxPrice < 50000 || maxPrice > 10_000_000) {
     return NextResponse.json(
-      { error: 'maxPriceKrw must be 30000 ~ 10000000' },
+      { error: 'maxPriceKrw must be 50000 ~ 10000000' },
       { status: 400 },
     );
   }

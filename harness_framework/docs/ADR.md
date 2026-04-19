@@ -37,21 +37,24 @@
 
 ---
 
-### ADR-004 [재작성 2026-04-18] 데이터 소스 구조 — 커뮤니티 관측 + 시드 baseline
-**배경**: ADR-022 Deprecated 로 외부 시세 API 계층 제거. 2-레이어(커뮤니티) + Baseline(관측·시드) 구조로 재편.
+### ADR-004 [재작성 2026-04-19] 데이터 소스 구조 — 커뮤니티 관측 + 시드 baseline (Phase 3 확장)
+**배경**: ADR-022 Rejected 로 외부 시세 API 계층 **영구** 제거. 2-레이어(커뮤니티) + Baseline(관측·시드) 구조 유지 + Phase 3 로 커뮤니티 소스 확장 (ADR-030).
 
 **결정**:
 | 레이어 | 소스 | 역할 | 단계 |
 |--------|------|------|:----:|
 | 🎯 Baseline (관측) | `price_observations` (크롤 데이터 누적) | 🔥 판정 분위수 — 주(主) | Core |
 | 🎯 Baseline (시드) | `baseline_seed.json` (수동 조사 20 노선 × FSC/LCC/mixed) | 콜드 스타트·재난 폴백 | Core |
-| ② 큐레이션 딜 | 플레이윙즈 블로그 | 빠른 1차 전파 + 관측 공급 | Stretch (ADR-025 통과 후) |
+| ② 큐레이션 딜 | 플레이윙즈 블로그 | 빠른 1차 전파 + 관측 공급 | Stretch 1 (ADR-025 통과) |
 | ③ 사회적 증거 | 뽐뿌 해외여행 | 반응 신호 + 관측 공급 | Core |
-| ③' 사회적 증거 | 루리웹 핫딜 | 반응 신호 + 관측 공급 | Stretch |
+| ③' 사회적 증거 | 루리웹 핫딜 | 반응 신호 + 관측 공급 | Stretch 1 |
+| ④ 커뮤니티 확장 | 클리앙 알뜰구매 (항공권 태그) | 기술 친화 커뮤니티 핫딜 커버리지 | **Stretch 3 (ADR-030)** |
+| ④' 커뮤니티 확장 | 디시 항공권 갤러리 | 볼륨 + 반응 신호 (엄격 파서) | **Stretch 3 (ADR-030)** |
+| ④'' 큐레이션 확장 (조건부) | 네이버 블로그 큐레이터 (어미새 등) | LLM 기반 제목 추출 | **Stretch 3 조건부 (ADR-025 절차 재적용)** |
 
-시세 API 계층은 Core 에 없음. 포털 재오픈·대안 확보 시 `BACKLOG.md` → ADR-026 **3-stretch-market-api** 로 부활.
+시세 API 계층은 **영구 제외** (ADR-022 Rejected). 부활은 **신규 ADR 로만** 가능하며 조건은 ADR-022 Rollback 조건 참조.
 
-클리앙·디시·레드비쥬·Secret Flying 등은 v2 Deferred. 상용 OTA(스카이스캐너 등) 직접 크롤링 **절대 금지** (검색 URL 생성은 예외, ADR-027).
+레드비쥬 · Secret Flying · The Flight Deal 등 나머지 소스는 v2 Deferred 유지. 상용 OTA(스카이스캐너 등) 직접 크롤링 **절대 금지** (검색 URL 생성은 예외, ADR-027).
 
 **이유**: 외부 시세 API 의존 제거로 시연 안정성 상승. 뽐뿌 크롤만으로도 `price_observations` 가 자연 누적되어 시간이 지날수록 baseline 정확도 자동 상승. 초기 2~4주는 시드가 공백을 메움.
 
@@ -92,7 +95,7 @@
 ---
 
 ### ADR-006 [재작성 2026-04-18] 🔥 저점 판정 — 관측+시드 FSC/LCC 분위수 (하위 10%)
-**배경**: ADR-022 Deprecated 로 Amadeus 분위수 경로 제거. baseline 소스는 ADR-011 우선순위 따름.
+**배경**: ADR-022 Rejected 로 Amadeus 분위수 경로 영구 제거. baseline 소스는 ADR-011 우선순위 따름.
 
 **결정**: 딜의 `carrier_class` 에 해당하는 baseline 분위수를 기준으로, `price_percentile ≤ 10` 일 때 `hot_deal = true`.
 
@@ -167,7 +170,7 @@
 ---
 
 ### ADR-011 [재작성 2026-04-18] Baseline 우선순위 — 관측 주(主), 시드 폴백
-**배경**: ADR-022 Deprecated 로 Amadeus 계층 제거. 외부 시세 API 없이 운영.
+**배경**: ADR-022 Rejected 로 Amadeus 계층 영구 제거. 외부 시세 API 없이 운영.
 
 **결정 (우선순위 내림차순)**:
 1. **1순위**: `price_observations` ≥ 30건 + carrier_class 매치 → **관측 단독 분위수**
@@ -310,27 +313,40 @@
 
 ---
 
-### ADR-022 [Deprecated 2026-04-18] Amadeus Self-Service API 통합
-**상태**: **Deprecated 2026-04-18** — Amadeus for Developers 개발자 포털 신규 가입 중단 확인. Client credentials 발급 경로 부재로 Core에서 제거.
+### ADR-022 [Rejected 2026-04-19] 외부 시세 API 통합 — 영구 제외
 
-**원결정 요약 (히스토리 보존)**: 무료 Flight 엔드포인트 3종(Cheapest Date Search · Price Analysis · Flight Offers Search)을 `services/amadeus.ts` 에서 호출, `route_market_data` 에 30h TTL 캐싱, FSC/LCC 이중 집계로 월 1,780/2,000 한도 내 운영.
+**상태**: **Rejected 2026-04-19** — Deprecated (2026-04-18) 에서 승격. 단순 "포털 재오픈 대기" 가 아니라 **구조적 효용이 낮음** 을 확인.
 
-**폐기 사유**:
-1. 개발자 포털 자체 접근 불가 → OAuth2 client credentials 발급 불가능
-2. 대안 API 실사용성 검토:
-   - **Travelpayouts / Aviasales** — 제휴(referral) 수익화 전제. ADR-008 "학습 프로젝트 · 원문 트래픽 환원" 철학과 충돌
-   - **Kiwi Tequila** — API 정책 축소 추세, 가용성 불확실
-   - **SerpAPI Google Flights** — 월 $75 이상, 학습 프로젝트 예산 밖
-   → Core 기간 내 신뢰 가능한 무료 대체 소스 없음
+**최초 결정 → 재평가 경로**:
+- 2026-04-18 Deprecated: Amadeus for Developers 포털 신규 가입 중단 계기로 Core 에서 제거. "재오픈 시 부활" 가능성은 열어둠
+- 2026-04-19 Rejected: 대안 시장 재조사 + "핫딜 의 본질" 재검토 결과, GDS 기반 API 자체가 **Cheapsky 의 핵심 가치(핫딜 감지)** 와 구조적으로 분리된다고 판단
 
-**대체 조치 (전면 재배치, ADR-004/006/011/024/026/028 교차 수정)**:
-- Core baseline은 **수동 시드 + 관측 데이터 단독 운영** (ADR-011 재작성)
-- `services/amadeus.ts`, `scripts/ingest_market.ts`, `route_market_data.source='amadeus'` 경로 **전부 미구현**
-- `methodology.md` 시드 대상 10 → **20개 노선 전수**로 확장
-- 환경변수 `AMADEUS_CLIENT_ID` / `AMADEUS_CLIENT_SECRET` 미사용 (`.env.example` 에서 제거)
-- 포털 재오픈 또는 ToS·비용 기준 통과하는 대안 확보 시 `BACKLOG.md` "시세 API 통합" → ADR-026 **3-stretch-market-api** 로 부활
+**재평가 (2026-04-19 landscape)**:
+1. **Amadeus self-service**: 2026-07-17 영구 EOL 확정 (포털 · API key 일괄 비활성). Enterprise 티어만 존속 (개인 접근 경로 없음)
+2. **Kiwi Tequila**: 2024 이후 invite-only 전환. 신규 self-serve 가입 불가
+3. **Travelpayouts / Aviasales**: affiliate 수익화 전제. ADR-008 "원문 트래픽 환원" 철학 충돌 (계약상 제휴 링크 attribution 요구)
+4. **Duffel Starter**: 검색 무료 · 50 booking/월 무료. 다만 Duffel 은 "sell travel" 플랫폼 — 부킹 flow 없이 가격만 가져오는 사용 방식은 ToS 회색지대 (계정 정지 리스크)
+5. **FlightAPI.io**: $49/mo (30k calls). 기술적으로 가능하나 "개인 실사용 툴" 맥락에서 월 $49 비용 대비 효용 불명
+6. **Skyscanner API**: Partner 승인제 · self-serve 불가
+7. **AviationStack / 공공데이터포털 (KAC)**: 운항 스케줄만 제공 · 가격 데이터 부재
 
-**Rollback 조건**: 없음 (이미 Rollback 상태). 부활은 신규 ADR 로 처리.
+**구조적 폐기 사유 (핵심)**:
+- **GDS-based API ≠ 핫딜 소스.** 한국 핫딜은 **GDS 밖 채널** 에서 주로 발생 — 카드사 할인/프로모션 코드 / 여행사 단독 블록 좌석(여행박사·노랑풍선 등 자체 재고) / OTA 단독 특가(트립닷컴·마이리얼트립) / Hidden-city · error fare / 항공사 이벤트 세일. GDS 는 정규 retail 가격만 노출
+- **"참고 baseline" 역할은 이미 관측+시드가 수행 중** (ADR-011). 외부 API 추가의 한계 효용은 정확도 1~2% 개선 수준
+- **Cheapsky 차별화는 커뮤니티 신호 품질** — GDS enterprise 백엔드가 아님. Phase 3 투자 방향은 **커뮤니티 소스 확장** (ADR-030) 이 ROI 측면에서 우위
+
+**대체 조치 (이미 시행됨, ADR-004/006/011/024/026/028 교차 수정)**:
+- Core baseline = **수동 시드 + 관측 데이터 단독 운영** (ADR-011)
+- `services/amadeus.ts` · `scripts/ingest_market.ts` · `route_market_data.source='amadeus'` 경로 **전부 미구현 · 영구 제외**
+- `methodology.md` 시드 대상 **20개 노선 전수 조사**
+- 환경변수 `AMADEUS_CLIENT_ID` / `AMADEUS_CLIENT_SECRET` 영구 삭제 (`.env.example` 에서 제거 완료)
+- Phase 3 (`3-stretch-market-api`) 폐기 → `3-community-expansion` 으로 대체 (ADR-026 재작성, ADR-030 신규)
+
+**BACKLOG 상태**: "시세 API 재평가" 항목은 🟥 Rejected 섹션으로 이동. 분기별 10분 리서치 타임박스만 유지 (무료 API 시장 재등장 감지용, 자동 착수 아님)
+
+**Rollback 조건**: **신규 ADR 로만 복원 가능.** 복원 trigger 는 다음 둘 중 하나:
+1. GDS 외 핫딜 데이터 공급이 가능한 API 등장 (예: 여행사 단독 블록 데이터 API, 카드사 프로모션 API)
+2. 본 프로젝트가 개인 실사용 → 공개 서비스 로 성격 변화 + 월 $49+ 비용 정당화 가능한 사용자 규모 확보
 
 ---
 
@@ -359,7 +375,7 @@
 ---
 
 ### ADR-024 [Core, 2026-04-18 소스 재조정] FSC/LCC 이중 Baseline 분리
-**배경**: ADR-022 Deprecated 로 Amadeus 엔드포인트별 집계 계산 제거. FSC/LCC 분리 원칙 자체는 유지 — 소스만 `price_observations` + `baseline_seed.json` 으로 교체.
+**배경**: ADR-022 Rejected 로 Amadeus 엔드포인트별 집계 계산 영구 제거. FSC/LCC 분리 원칙 자체는 유지 — 소스만 `price_observations` + `baseline_seed.json` 으로 교체.
 
 **결정**: baseline 저장·조회를 `(origin, destination, carrier_class)` 키로 분리. 딜 평가 시 자신의 `carrier_class` 분위수 사용. 미상일 때 `mixed` 집계 사용.
 
@@ -420,39 +436,58 @@
 
 ---
 
-### ADR-026 [재작성 2026-04-18] MVP Core / Stretch 분리 — 3-트랙
-**결정**: MVP를 세 트랙으로 나누어 개발 순서 강제. ADR-022 Deprecated 로 Core 시간 버퍼 단축.
+### ADR-026 [재작성 2026-04-19] MVP Core / Stretch 분리 — 3-트랙 (Phase 3 재정의)
+**결정**: MVP 를 세 트랙으로 나누어 개발 순서 강제. **Phase 3 를 `3-stretch-market-api` 에서 `3-community-expansion` 으로 교체** (ADR-022 Rejected · ADR-030 신규 근거).
 
-**Core (친구 평가 최소 요건, ~5~7d)** — Amadeus 통합 제거로 반나절~1일 단축:
-프로젝트 부트스트랩 + **시드 baseline + 관측 가중 혼합** + 뽐뿌 크롤러 + 규칙 파서 + FSC/LCC 판정 + 히어로 + 일반 리스트 + 🔥 배지 + **카드 한 줄 맥락 규칙 기반 폴백** + 필터 + Share Token + 실효성 검증(HEAD) + 크롤러 헬스 + `SHOW_CACHED_ONLY` + 비용 모니터(Supabase 크기 중심) + README(1분 DEMO 시나리오 인라인).
+**Core (친구 평가 최소 요건, ~5~7d)** — 완료 2026-04-18:
+프로젝트 부트스트랩 + **시드 baseline + 관측 가중 혼합** + 뽐뿌 크롤러 + 규칙 파서 + FSC/LCC 판정 + 히어로 + 일반 리스트 + 🔥 배지 + **카드 한 줄 맥락 규칙 기반 폴백** + 필터 + 공개 URL + 실효성 검증(HEAD) + 크롤러 헬스 + `SHOW_CACHED_ONLY` + 비용 모니터(Supabase 크기 중심) + README(1분 DEMO 시나리오 인라인).
 
-**Stretch (~+3~5d)** — 3개 task로 분리:
-- **1-stretch-sources**: 루리웹 크롤러 / 플레이윙즈 크롤러(ADR-025 통과 후) / Community Picks 섹션
-- **2-stretch-enhancements**: LLM 파싱 폴백 + 큐레이션 / 스파크라인 / 시세 히트맵(관측+시드 한정) / 노선 빈도 / 실효성 검증 정밀 / 아카이브 / GLOSSARY·OPERATIONS·LLM_PROMPTS 문서
-- **3-stretch-market-api** (**외부 조건부**): 시세 API 재통합. Amadeus 포털 재오픈 또는 ADR-008 ToS·비용 통과하는 대안(예: 포털 복귀, 신규 무료 API 등장) 확보 시에만 착수. 산출물: `services/<market-api>.ts` 클라이언트 + `scripts/ingest_market.ts` + `route_market_data.source='api'` 갱신 + 시세 히트맵 20개 완전 커버
+**Stretch** — 3개 task 분리:
+- **1-stretch-sources** (완료 2026-04-19): 루리웹 크롤러 / 플레이윙즈 크롤러(ADR-025 통과 후) / Community Picks 섹션
+- **2-stretch-enhancements** (완료 2026-04-19): LLM 파싱 폴백 + 큐레이션 / 스파크라인 / 시세 히트맵(관측+시드 한정) / 노선 빈도 / 실효성 검증 정밀 / 아카이브 / GLOSSARY·OPERATIONS·LLM_PROMPTS 문서
+- **3-community-expansion** (**차기 착수, ADR-030**): 핫딜 감지력 강화 방향으로 소스 확장. 기존 뽐뿌+루리웹+플레이윙즈 3곳 → +클리앙 알뜰구매 · +디시 항공권 갤러리 · (조건부) +네이버 블로그 큐레이션. 산출물: 신규 크롤러 2~3종 + 소스 교차 매칭(`sources` 배열 N개 이상 동시 포스팅 = hot 신호 승격) + CrawlerHealth 푸터 확장
+
+**이전 Phase 3 (3-stretch-market-api) 처리**: ADR-022 Rejected 로 영구 폐기. BACKLOG 🟥 Rejected 섹션으로 이동. 실시간 시세 교차 기능은 **관측+시드 baseline 정확도 개선** 으로 대체.
+
+**프레임 확장 (2026-04-19)**:
+- 원래 **"2주 학습용 MVP + 친구 평가"** 프레임
+- Core/Stretch 1/Stretch 2 완료 후 **"개인 · 소수 지인 실사용 지속 개선"** 프레임으로 확장 (본인+지인 3~5명 대상, 무기한 개선 모드)
+- 이 프레임 전환은 MVP 범위 자체는 유지 (ADR-016 scope creep 격리). 다만 Phase 3 이후 착수 우선순위는 **실사용 가치** 로 정렬
 
 **규칙**:
-- Core 완성 전 Stretch 금지 (PR/commit 단위 자가 규율)
+- Core 완성 전 Stretch 금지 (PR/commit 단위 자가 규율) — Core 완료로 해제됨
 - Stretch 중 막히면 다음 Stretch 로 이동, Core 회귀 금지
-- **3-stretch-market-api 는 외부 조건부** — API 가용성·ToS·비용 사전 확인 없이 착수 금지. 진입 시 신규 ADR 추가 필수
-- Stretch 항목 중 완료된 것만 평가 시 노출, 미완은 숨김
+- **3-community-expansion** 진입 전제: ADR-030 승인 (완료) + 각 신규 소스별 robots.txt · ToS 개별 점검 (step0 에서 수행)
+- Stretch 항목 중 완료된 것만 평가·실사용 노출, 미완은 숨김
 
-**Core 시간 버퍼 근거** (2026-04-18 갱신):
+**차기 Phase 큐 (Phase 3 완료 후 검토 후보)**:
+- **4-personal-reliability** (운영 신뢰도): verify.ts PRECISE GET + 가격 패턴 / notify-failure 웹훅 / baseline seed 분기 자동 갱신 / `/ops` 알림 규칙
+- **5-personal-features** (지인 공유 UX): Discord/Telegram bot / 역검색 / PWA / Saved route 개인 알림 확장
+- **6-advanced-analysis** (데이터 축적 후): 90일 추이 모달 / 시즌 best timing 전체 노선 / 작년 대비 레이블
+
+이들은 **BACKLOG 우선순위 큐** 로 유지. 본 ADR 이 직접 정의하지 않음.
+
+**Core 시간 버퍼 근거** (2026-04-18 최초 설정, 회고):
 - ~~Amadeus OAuth 발급·테스트: 반나절~~ → 제거
 - Supabase RLS 디버그: 반나절
-- Vercel middleware (Share Token + Basic Auth) 테스트: 반나절
+- ~~Vercel middleware (Share Token + Basic Auth) 테스트: 반나절~~ → ADR-019 Deprecated 로 제거
 - 뽐뿌 파싱 골든셋 튜닝: 반나절~1일
 - 숨은 셋업 비용 1~1.5d 가량 명시적 반영
 
-**이유**: ADR-022 Deprecated 로 외부 시세 API 의존 제거. 완주 리스크 축소. Core 범위가 좁아진 만큼 완성도에 투입할 여유 확보.
+**이유**:
+- ADR-022 Rejected 로 외부 시세 API 경로 영구 제외 → Phase 3 슬롯 재활용
+- 핫딜 감지력 강화는 "시장 baseline 정확도" 보다 **커뮤니티 채널 커버리지 확장** 이 ROI 높음 (ADR-030 근거)
+- 개인 실사용 맥락 확장 → 소스 다양성이 "오늘 놓친 딜 0건" 체감 품질 향상
 
 **트레이드오프**:
-- 🔥 배지 초기 confidence 가 낮음 (관측 누적 전)
-- 시세 히트맵(Stretch 2)이 관측 쌓인 노선만 표시 → 20개 완전 커버는 Stretch 3 조건부
-- 차별화 포인트 하나(실시간 시세 교차)가 약해짐 → 관측 누적과 시드 FSC/LCC 분리 정확도로 보완
+- 차별화 포인트 "실시간 시세 교차" 영구 포기 → 관측 누적 + 시드 FSC/LCC 분리 정확도 + 소스 교차 매칭으로 보완
+- 신규 소스 2~3곳 추가 시 크롤러 유지 부담 증가 → ADR-008 동일 원칙 적용 + 소스별 ToS 사전 점검 필수
+- 크롤링 대상 증가 → 크롤러 실패 가능성 상승 → `notify-failure.yml` 강화 (Phase 4 후보)
 
 **Rollback 조건**:
-- Core 진도가 4일차에 50% 미만이면 Stretch 포기 선언하고 Core 완성도에 전력
+- Core 진도 50% 미만이면 Stretch 포기 (2026-04-18 완료로 더 이상 적용 안 됨)
+- Phase 3 착수 중 신규 소스 ToS 거부 → 해당 소스만 영구 제외, 나머지로 진행
+- 전체 Phase 3 착수 1주 내 완주 불가 → 범위 축소 (예: 클리앙만 먼저)
 
 ---
 
@@ -493,7 +528,7 @@ https://www.skyscanner.co.kr/transport/flights/{origin}/{destination}/{YYMMDD}/
 - 배치를 멈추면 커뮤니티가 복구돼도 UI 데이터 안 갱신 → 시연 끝 직전 수동 해제 필요
 - UI 전용으로 바꾸면 배치가 알아서 복구 → 수동 개입 최소화
 
-**이유**: 시연 당일 뽐뿌(Core) 또는 (Stretch) 루리웹·플레이윙즈·Anthropic 중 하나라도 장애가 나면 최악. UI를 "정상 척 안 함"으로 전환하는 패닉 버튼. ADR-022 Deprecated 로 Amadeus 의존은 없음 (Stretch 3 진입 전까지).
+**이유**: 시연 당일 뽐뿌(Core) 또는 (Stretch) 루리웹·플레이윙즈·Anthropic 중 하나라도 장애가 나면 최악. UI를 "정상 척 안 함"으로 전환하는 패닉 버튼. ADR-022 Rejected 로 Amadeus 등 외부 시세 API 의존은 영구 없음.
 **트레이드오프**: UI는 "캐시" 라벨로 덜 매력적이지만 방어적. 배치 오작동 시에도 UI는 조용함.
 **Rollback 조건**: 한 번도 안 쓰이면 env조차 제거. 쓴 후 복구는 env 삭제.
 
@@ -534,16 +569,79 @@ https://www.skyscanner.co.kr/transport/flights/{origin}/{destination}/{YYMMDD}/
 
 ---
 
+### ADR-030 [Stretch 3] 커뮤니티 소스 확장 — 클리앙 · 디시 · (조건부) 네이버 블로그 + 소스 교차 매칭
+**결정**: Phase 3 (`3-community-expansion`) 의 근거 ADR. 기존 3곳(뽐뿌 · 루리웹 · 플레이윙즈) → 최대 6곳 까지 확장. **단일 소스 놓침 리스크** 를 줄이고, **소스 교차 매칭** 으로 "진짜 핫한 딜" 신호를 강화.
+
+**배경**:
+- ADR-022 Rejected 로 외부 시세 API 경로 영구 폐기. Phase 3 슬롯 재정의 필요
+- 한국 핫딜 은 GDS 외 채널에서 발생 (카드사 · 여행사 · OTA 단독 · error fare). **GDS API 추가 < 커뮤니티 채널 확장** 이 핫딜 감지력 측면 ROI 우위
+- 기존 3곳 크롤러가 안정화되어 동일 원칙(ADR-008) 으로 추가 소스 수용 가능
+
+**신규 소스 범위**:
+
+| 우선순위 | 소스 | URL | 특성 | 단계 |
+|:------:|------|-----|------|:----:|
+| 1 | **클리앙 '알뜰구매'** 중 항공권 태그 | `clien.net/service/board/jirum` (필터링) | 기술 친화 커뮤니티, 제목 구조 정형 | step1~2 |
+| 2 | **디시인사이드 항공권 갤러리** | `gall.dcinside.com/mgallery/board/lists/?id=airplane_new2` | 볼륨 큼, 반응 신호 풍부, 노이즈도 큼 → 엄격한 파서 필요 | step3~4 |
+| 3 (조건부) | **네이버 블로그 큐레이션 블로거** | 블로거별 RSS · 또는 LLM 기반 제목 추출 (Stretch 2 LLM 재활용) | 플레이윙즈 외 블로거(어미새 · 트래블위즈 등). ADR-025 절차 각 블로거별 반복 | step5 (조건부) |
+
+유럽/북미 커뮤니티 (Secret Flying · The Flight Deal) 는 한국 출발 필터링 비용 대비 효용 낮아 제외.
+
+**소스 교차 매칭 규칙 (신규 기능)**:
+- 기존 `dedupe_key` 체계 (ADR-009) 유지 — 같은 해시에 떨어진 딜의 `sources` 배열 병합
+- **승격 규칙**: `sources.length >= 3` 일 때 `social_signal = 'hot'` 강제 부여 (기존 socialSignal 규칙과 OR)
+- **UI 표기**: `DealCard` 에 "뽐뿌 · 클리앙 · 디시 3곳 동시 등장" 같은 소스 다중 라벨 (60자 cut)
+- **이유**: 여러 커뮤니티에서 동시에 주목받은 딜 = 실제 핫 확률 압도적으로 높음 (각 소스 독립 검증)
+
+**ADR-008 동일 원칙 적용**:
+- robots.txt 준수 + 요청 간격 ≥ 1초 + 동시성 1
+- UA 투명: `Cheapsky/0.2 (학습+개인 실사용 프로젝트, +mailto:<연락처>)`
+- 저장 범위: 제목 · 가격 · 링크 · 메타만 영구. 본문 7일 TTL. 작성자 닉네임/아이디 저장 금지
+- 원문 링크 환원 유지
+
+**소스별 step0 필수 점검** (진입 조건):
+- robots.txt 에서 해당 게시판 경로 허용 여부
+- ToS 에 "자동화 수집 금지" 명시 여부 (있으면 해당 소스 drop)
+- rate limit 정책 (분당 요청 수 제한 등)
+- 작성자 식별 정보 노출 범위 (저장 대상 제외 확인)
+
+**이유**:
+- **놓침 리스크 완화**: 뽐뿌만 본 유저는 디시 독점 딜 놓침. 다수 소스는 "radar" 컨셉에 부합
+- **신호/노이즈 비율 개선**: 소스 교차 매칭이 핫딜 구분선 역할 (단일 소스 = weak, 3곳 교차 = strong)
+- **개인 실사용 가치**: 본인+지인 이 매일 확인할 때 "오늘 놓친 딜 0건" 체감 확률 상승
+
+**트레이드오프**:
+- 크롤러 유지 부담 3 → 최대 6곳 (2배). `notify-failure.yml` 강화로 완화 (Phase 4 후보)
+- 노이즈 많은 소스(디시) 파싱 품질 이슈 → 엄격한 규칙 + LLM 파싱 폴백(Stretch 2 기존 활용) 조합
+- 소스 다양화는 `price_observations` 샘플 품질을 일시적으로 떨어뜨릴 수 있음 → `source_weight` (뽐뿌 1.0, 클리앙 1.0, 디시 0.6 등) 옵션 검토 (Phase 3 내부 조정, ADR 불필요)
+
+**Rollback 조건**:
+- 특정 신규 소스 ToS 거부 or 운영진 요청 → 해당 소스만 영구 제외
+- 소스 교차 매칭 승격 규칙이 실제 핫딜이 아닌 "조작 가능한" 패턴 반복 노출 → 규칙 강화 (`sources.length >= 4` 등)
+- 전체 Phase 3 안정화 3개월 내 실패 → BACKLOG 기존 크롤러만으로 회귀
+
+**관련 ADR**:
+- 004 (소스 구조): Stretch 3 레이어 추가 — 소스 확장 테이블 갱신
+- 008 (ToS · 저작권): 동일 원칙 적용 (신규 UA 버전만 `0.1 → 0.2`)
+- 009 (dedupe): `sources` 배열 확장 (최대 6 엔트리)
+- 022 Rejected: Phase 3 교체의 직접 원인
+- 025 (플레이윙즈 동의): 네이버 블로그 각 블로거별 동일 절차 재사용
+- 026 (3-트랙): Phase 3 정의 업데이트
+
+---
+
 ## ADR 상호 의존 지도 (2026-04-19 갱신)
-- **004 (소스 구조, 2-레이어+baseline)** → **011 (우선순위)** / **025 (플레이윙즈 동의, Stretch ② 조건부)**
+- **004 (소스 구조, 2-레이어+baseline, Phase 3 확장)** → **011 (우선순위)** / **025 (플레이윙즈·블로거 동의)** / **030 (커뮤니티 확장 소스)**
 - **005 (LLM)** ↔ **008 (저작권)**: LLM 전송 범위 제한
 - **006 (🔥 판정)** ← **024 (FSC/LCC 분리)** ← **011 (baseline 우선순위, 관측 주·시드 폴백)**
 - **006** ← **017 (공항 표준화)**: 정규화 후 집계
 - **006** ← **028 (SHOW_CACHED_ONLY)**: 캐시 모드에서 신뢰 하락 표시
-- **009 (dedupe)** ← **017 (공항)**, **024 (carrier_class)**
+- **009 (dedupe)** ← **017 (공항)**, **024 (carrier_class)**, **030 (sources 배열 확장)**
 - **014 (범위 출발일)** → **009**: 월 해시 근거
 - **020 (필터 5종)** ← **007 (URL 상태)**
 - **021 (범위, 20개 노선)** → **011 (시드 20개 전수)**
-- **022 (Amadeus)**: **Deprecated 2026-04-18** — 대체: 011 (관측+시드 단독). 부활은 026 의 **3-stretch-market-api** 조건부
+- **022 (외부 시세 API)**: **Rejected 2026-04-19** — 영구 폐기. 대체: 011 (관측+시드 단독). 복원은 신규 ADR 로만 (복원 trigger 는 022 Rollback 조건)
 - **023 (3-섹션 UI)** ← **027 (카드 유형)**: 시세 카드는 히트맵 전용 (Stretch, 관측+시드 한정)
-- **026 (Core / Stretch 1 / Stretch 2 / Stretch 3-market-api)** → 전 ADR: 각 결정의 단계 분류
+- **025 (동의 절차)** → **030 (네이버 블로그 큐레이터 각 블로거별 재사용)**
+- **026 (Core / Stretch 1 / Stretch 2 / Stretch 3-community-expansion)** → 전 ADR: 각 결정의 단계 분류. Phase 3 정의 재작성 (2026-04-19)
+- **030 (커뮤니티 확장)** ← **022 Rejected (Phase 3 슬롯 재활용 근거)** + **008 (ToS 동일 원칙)** + **009 (sources 배열 교차 매칭)**

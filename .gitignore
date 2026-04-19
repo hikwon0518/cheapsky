@@ -1,0 +1,60 @@
+# Cheapsky monorepo .gitignore
+# app/ (Next.js) + harness_framework/ (phase harness) 통합.
+
+# Dependencies
+**/node_modules/
+
+# Next.js build artifacts
+**/.next/
+**/out/
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Environment / secrets (ADR-002 public repo 전제)
+# .env.example 는 예외로 커밋
+**/.env
+**/.env.local
+**/.env.*.local
+!**/.env.example
+
+# Python hooks + tests
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.venv/
+**/venv/
+
+# Harness phase 실행 산출물 (Claude session output, dump)
+harness_framework/phases/**/phase*-output.json
+harness_framework/phases/**/step*-output.json
+harness_framework/harness.log
+harness_framework/*.log
+
+# QA + scratch + design bundle (local-only artifacts)
+app/.qa-report/
+app/.scratch-*
+.design-bundle/
+
+# Private fixtures (large captured HTML)
+app/__fixtures__/*.private.html
+
+# Coverage / testing
+coverage/
+
+# Logs
+*.log
+*.tmp
+*-dump.json
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# gstack local state
+.gstack/
+
+# Claude Code local settings (사용자 로컬 허용 경로 — 공유 금지)
+.claude/settings.local.json
+**/.claude/settings.local.json

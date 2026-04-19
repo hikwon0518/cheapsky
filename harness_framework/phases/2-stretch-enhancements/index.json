@@ -1,0 +1,72 @@
+{
+  "project": "cheapsky",
+  "phase": "2-stretch-enhancements",
+  "steps": [
+    {
+      "step": 0,
+      "name": "llm-parser-fallback",
+      "status": "completed",
+      "started_at": "2026-04-19T10:21:09+0900",
+      "completed_at": "2026-04-19T10:41:40+0900",
+      "summary": "[DEFERRED — Anthropic 크레딧 부족 (2026-04-19), 실 API 검증은 사용자 크레딧 충전 후로 이연. 코드는 완료:] @anthropic-ai/sdk 0.90 설치, lib/llm-budget.ts (KST 일자 UPSERT + 세션 카운터 + DB 토큰 환산 gate) + 테스트 6건, services/parser/llm.ts (claude-haiku-4-5-20251001 고정, 제목+본문 500자 cut, tool_use JSONSchema, 1회 지수 백오프 + 429 즉시 중단, fail-soft) + 테스트 10건, scripts/crawl.ts 에 isStretchStage + 동적 import + budget.canSpend 분기 추가. pnpm build/test/typecheck/lint 전부 Core·Stretch 양쪽 통과. 크레딧 충전 후 `CHEAPSKY_STAGE=stretch pnpm tsx scripts/crawl.ts` 재실행 시 api_usage_daily 행 갱신 확인 필요."
+    },
+    {
+      "step": 1,
+      "name": "llm-curation",
+      "status": "completed",
+      "started_at": "2026-04-19T10:43:49+0900",
+      "completed_at": "2026-04-19T10:54:16+0900",
+      "summary": "services/curator.ts (Haiku 4.5 고정, 숫자 필드만 전송, system prompt cache_control ephemeral, 60자 clamp + 금칙어 /역대가|Amadeus|Anthropic|Claude|LLM|API/ + 숫자 환각 validateNumberFidelity ±1, 1회 지수 백오프 + 429 즉시 중단, fail-soft text=null) + curator.test.ts (12건, 모델·cache_control·금칙어·환각·budget gate·429 검증) + scripts/curate.ts (crawler_runs source='curator', hot_deal 50개 배치, 24h refresh window, route_market_data p50/p10 + 최근 30일 최저 조회, CHEAPSKY_STAGE gate 로 Core 즉시 종료 + crawler_runs.errors 사유 기록) + .github/workflows/curate.yml (cron 30 * * * *, env.CHEAPSKY_STAGE=stretch — Core workflows 와 격리) + DealCard CurationLine override prop 연동. pnpm build/test/typecheck/lint 전부 통과 (325 tests). 실 curate 샘플: Core gate 정상 + Stretch 실행 정상 (현재 DB 에 hot_deal 0 건이라 saved=0)."
+    },
+    {
+      "step": 2,
+      "name": "sparkline",
+      "status": "completed",
+      "started_at": "2026-04-19T10:54:16+0900",
+      "completed_at": "2026-04-19T11:05:00+0900",
+      "summary": "Sparkline.tsx ('use client', inline SVG, native fetch + useState/useEffect 3-state, 색맹 보조 dasharray + stroke-width 2 변조, hover 텍스트 오버레이 tooltip) + /api/price-trace/[id]/route.ts (90일 관측 aggregation, 같은 날 최저가, 5분 캐시 s-maxage=300 SWR=1800, uuid 가드, fail-soft 빈 body) + lib/price-trace.ts 로 순수 로직 분리 (Next.js 15 route export 제약 회피) + DealCard list 변형에만 주입 (히어로·snapshot 제외) + 23 new tests (route 12 + Sparkline 11). 차트 라이브러리 / SWR / Zustand / React Query 0건. pnpm build/test(348)/typecheck/lint 전부 통과."
+    },
+    {
+      "step": 3,
+      "name": "market-heatmap",
+      "status": "completed",
+      "started_at": "2026-04-19T11:08:08+0900",
+      "completed_at": "2026-04-19T11:22:59+0900",
+      "summary": "MarketCard.tsx (border-dashed, 참고 시세 라벨, 스카이스캐너 검색 URL, '예약 시 가격은 달라질 수 있어요' 고지, cell/row 두 변형) + MarketHeatmap.tsx (Server, 5×4 데스크톱 grid + 모바일 프리뷰 3 + HeatmapMobileToggle 'use client' 토글) + services/market-heatmap.ts (HEATMAP_DESTINATIONS 20 노선 ADR-021 고정, selectRepresentative 5단계 우선순위: FSC+LCC observed 병합 → 단일 observed → seed FSC 우선 → seed LCC → seed mixed low) + buildMarketHeatmap (resolveBaseline × 3 class 동시 호출, fail-soft) + /api/market route (s-maxage=600 SWR=3600, X-Robots-Tag noindex) + page.tsx 에 marketRows 로드·MarketHeatmap 섹션 추가. 13개 신규 테스트 (5단계 + 노선 목록 + 도착지 매핑). pnpm build/test(361)/typecheck/lint 전부 통과. 스모크: /api/market?t=... 20 노선 모두 seed 기반 응답 확인."
+    },
+    {
+      "step": 4,
+      "name": "route-frequency",
+      "status": "completed",
+      "started_at": "2026-04-19T11:22:59+0900",
+      "completed_at": "2026-04-19T11:34:32+0900",
+      "summary": "services/route-frequency.ts (단일 배치 쿼리, O(1) DB hit — `.in('origin').in('destination').gte('posted_at')` 한 번. 30일 윈도우 고정, cross-product pair 안전 필터, fail-soft 빈 Map) + RouteFrequency.tsx (ordinal 1 강조 emerald / 2~4 회색 N번째 / 5+ '자주 올라오는 노선 (30일 N회)' / 0 생략) + DealCard list 변형에만 freqInfo 주입 (히어로 제외 UI_GUIDE) + DealList·CommunityPicks freqMap prop 추가 + page.tsx loadFrequencyMap 으로 list+picks 한 번에 집계. 10개 신규 테스트 (빈 입력 / 0 / 오름차순 ordinal / 50 딜 O(1) DB 검증 / 30일 경계 / cross-product / fail-soft 2종 / single-deal wrapper 2종). pnpm build/test(371)/typecheck/lint 전부 통과. 스모크: 실 페이지에서 '첫 등장', '2~4번째', '자주 올라오는 (30일 9회)' 3분기 전부 렌더 확인."
+    },
+    {
+      "step": 5,
+      "name": "verifier-precise",
+      "status": "completed",
+      "started_at": "2026-04-19T11:34:33+0900",
+      "completed_at": "2026-04-19T11:43:12+0900",
+      "summary": "services/verifier.ts 에 verifyUrlPrecise 추가 (GET 10s + ReadableStream reader 20KB cap + reader.cancel() + extractPricesKrw 3-pattern [135,000 / 135000원 / 135천원, 10K~10M 범위] + ±10% tolerance → matched/drifted/missing → active/price_changed/active). UA 는 CRAWLER_USER_AGENT 그대로 전송 (위장 금지). scripts/verify.ts 에 isStretchStage() 분기 — Core=HEAD / Stretch=PRECISE. deal_verifications.note 에 priceSignal 기록, deals.verification_status 'price_changed' 처리 (fail_count 유지). 11개 신규 테스트 (matched/drifted/missing/20KB cap+reader.cancel/404/5xx/timeout/GET+UA + extractPricesKrw 3건). pnpm build/test(382)/typecheck/lint 전부 통과. 스모크: CHEAPSKY_STAGE=stretch 에서 'mode=PRECISE (GET+patterns)' · 미설정 시 'mode=HEAD' 양쪽 확인."
+    },
+    {
+      "step": 6,
+      "name": "archive-page",
+      "status": "completed",
+      "started_at": "2026-04-19T11:43:12+0900",
+      "completed_at": "2026-04-19T11:54:19+0900",
+      "summary": "scripts/archive_daily.ts (멱등 — date PK UPSERT + captured_at 갱신, hot_deal+active+expires>now TOP 5, crawler_runs source='archiver', deal_ids 빈 배열도 INSERT 하여 그날 기록 보존) + src/app/archive/[date]/page.tsx (Server Component, /^\\d{4}-\\d{2}-\\d{2}$/ 검증 → notFound, archive_snapshots 1행 조회 후 deals IN(...) 결과를 dealIds 순으로 재정렬, snapshot/price_changed/만료 모두 표시, metadata.robots noindex 명시) + DealCard 에 showArchivedLabel prop + 아카이브 페이지에서는 snapshot 도 링크 유지 (ARCHITECTURE 정책) + .github/workflows/archive_daily.yml (cron '5 15 * * *' = KST 00:05, CHEAPSKY_STAGE 미설정 — Core gate 유지). pnpm build(/archive/[date] 라우트 등록 확인)/test(382)/typecheck/lint 전부 통과. 스모크: 동일 날짜 두 번 실행 → archive_snapshots 1행 (UPSERT 멱등 확인), /archive/2026-04-19 200 + '아카이브'·'기록이 없어요' 렌더, /archive/invalid-date 404."
+    },
+    {
+      "step": 7,
+      "name": "stretch-docs",
+      "status": "completed",
+      "started_at": "2026-04-19T11:54:19+0900",
+      "completed_at": "2026-04-19T12:05:19+0900",
+      "summary": "app/docs/GLOSSARY.md (용어 사전 8장 — 가격/분위수/항공사/소스레이어/운영상태/접근제어/금지용어 매핑/혼동쌍, 금지용어는 ❌ 대체 표 + ADR 근거) + app/docs/OPERATIONS.md (10장 런북 — 주기 작업 타임라인 · 장애 타입 7종 대응 · Vercel 배포/롤백 · Supabase 500MB 4단계 정리 · SQL 스니펫 8개 · Share Token rotate · ADR-025 이의 제기 24h 체크리스트 · /api/health JSON + 푸터 점 색 기준 · 시연 전날 체크리스트) + app/docs/LLM_PROMPTS.md (Stretch 2 두 용도 아카이빙 — 파싱 폴백 system + tool_use input_schema 전문 + normalizeFields 후처리 + 카드 큐레이션 system + User 템플릿 + Few-shot 3~5개 + cache_control ephemeral 전략 + 금칙어 정규식 근거 + validateNumberFidelity ±1 로직 + 변경 이력). README Stretch 섹션을 1-sources/2-enhancements 완료 · 3-market-api 조건부 로 업데이트 + '관련 문서' 섹션에 신규 3 문서 링크 추가. 각 문서 12~16KB 로 1000자 기준 훨씬 상회. '역대가' 는 양 문서 모두 '금지 용어로 언급' 맥락에서만 등장. pnpm build/test(382)/typecheck/lint 전부 통과."
+    }
+  ],
+  "created_at": "2026-04-19T10:21:09+0900",
+  "completed_at": "2026-04-19T12:05:19+0900"
+}

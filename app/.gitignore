@@ -1,0 +1,28 @@
+# Next.js
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Environment
+.env.local
+.env*.local
+
+# Testing
+coverage/
+
+# Logs
+*.log
+
+# Private fixtures (large captured HTML)
+__fixtures__/*.private.html
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
+.gstack/

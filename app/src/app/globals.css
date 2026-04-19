@@ -1,0 +1,292 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Light palette (Cheapsky Light v5, 2026-04-19).
+ * 원본 v5 prototype 에서 CSS 변수 그대로 포팅.
+ * Tailwind `colors.page / card / ink-* / line-*` 가 이 변수들을 참조.
+ */
+:root {
+  --page: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f6f6f4;
+  --surface-3: #efeee9;
+  --ink: #0b0b0c;
+  --ink-2: #2a2a2c;
+  --ink-3: #5c5c5f;
+  --ink-4: #8a8a8d;
+  --ink-5: #b4b2ac;
+  --line: #ececE7;
+  --line-2: #dedcd6;
+  --accent: #0a66ff;
+  --low: #0b7a3b;
+  --low-soft: #e8f2ea;
+  --low-line: #cfe4d4;
+  --warn: #a55509;
+  --warn-soft: #faead3;
+  --warn-line: #efd3a7;
+  --hot: #b8330e;
+  --hot-soft: #fbe7df;
+  --hot-line: #f0c6b4;
+  --up: #9a1b1b;
+  --up-soft: #fbe3e3;
+  --up-line: #efc7c7;
+  font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--page);
+  color: var(--ink);
+}
+
+body {
+  font-feature-settings: 'ss01', 'cv11', 'tnum';
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.015em;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+  .hairline {
+    border-color: var(--line);
+  }
+  .hairline-2 {
+    border-color: var(--line-2);
+  }
+  .dotsep::before {
+    content: '·';
+    margin: 0 0.45em;
+    color: var(--ink-5);
+  }
+}
+
+/* chip tokens (verdict + state badges) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.5;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  letter-spacing: -0.01em;
+}
+.chip-low {
+  background: var(--low-soft);
+  color: var(--low);
+  border-color: var(--low-line);
+}
+.chip-warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-color: var(--warn-line);
+}
+.chip-hot {
+  background: var(--hot-soft);
+  color: var(--hot);
+  border-color: var(--hot-line);
+}
+.chip-up {
+  background: var(--up-soft);
+  color: var(--up);
+  border-color: var(--up-line);
+}
+.chip-ghost {
+  background: transparent;
+  color: var(--ink-3);
+  border-color: var(--line);
+}
+
+/* card — 기본 / hero 변형 */
+.card-surface {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: border-color 0.15s;
+}
+.card-surface:hover {
+  border-color: var(--line-2);
+}
+.card-hero {
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.02),
+    0 24px 48px -32px rgba(20, 20, 20, 0.14);
+}
+
+/* preset chip — FilterBar quick filter */
+.preset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  transition: all 0.14s;
+  line-height: 1.2;
+}
+.preset:hover {
+  border-color: var(--ink-2);
+  color: var(--ink);
+}
+.preset[data-on='true'] {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.preset[data-on='true'] .p-count {
+  color: #cfcfcf;
+}
+.p-count {
+  color: var(--ink-4);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* verdict line (hero card 한 줄 결론) */
+.verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.verdict b {
+  font-weight: 600;
+}
+.verdict .from {
+  color: var(--ink-4);
+  text-decoration: line-through;
+  font-weight: 400;
+  margin-right: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.vi {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.vi-good {
+  background: var(--low-soft);
+  color: var(--low);
+}
+.vi-hot {
+  background: var(--hot-soft);
+  color: var(--hot);
+}
+.vi-mid {
+  background: var(--surface-2);
+  color: var(--ink-3);
+}
+.vi-warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.vi-up {
+  background: var(--up-soft);
+  color: var(--up);
+}
+
+/* btn — Hero CTA 용. Tailwind 로 모두 못 해서 별도 유틸리티. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: all 0.12s;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+  border: 1px solid var(--ink);
+}
+.btn-primary:hover {
+  background: #26261f;
+}
+.btn-ghost {
+  background: #fff;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+}
+.btn-ghost:hover {
+  border-color: var(--ink-2);
+  color: var(--ink);
+}
+
+/* card-ctas — Hero 만 hover 시 노출 */
+.card-ctas {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.15s;
+  pointer-events: none;
+}
+.deal:hover .card-ctas,
+.deal:focus-within .card-ctas {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+@media (hover: none) {
+  .card-ctas {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile bottom tab bar safe area (< 768px) */
+@media (max-width: 767px) {
+  body > div:first-of-type {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Pulse for LIVE dots on Timeline / Counter */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}

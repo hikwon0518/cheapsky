@@ -1,0 +1,30 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# phase execution outputs
+phases/**/phase*-output.json
+phases/**/step*-output.json
+
+# Python (hooks, harness tests)
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# env — 모든 .env 변형 차단, .env.example 만 예외
+.env*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# temp / dumps (git add -A 안전장치)
+*.tmp
+*-dump.json
+/tmp/
+*.log

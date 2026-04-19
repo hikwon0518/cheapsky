@@ -1,0 +1,464 @@
+[
+  {
+    "title": "[대한항공] 인천-오사카 왕복 135,000원 3~5월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "KIX",
+      "priceKrw": 135000,
+      "tripType": "roundtrip",
+      "carrierCode": "KE",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "[제주항공] 인천-후쿠오카 99,000원 6월 출발",
+    "expected": {
+      "origin": "ICN",
+      "destination": "FUK",
+      "priceKrw": 99000,
+      "tripType": "roundtrip",
+      "carrierCode": "7C",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "인천 싱가포르 싱가포르항공 왕복 45만원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "SIN",
+      "priceKrw": 450000,
+      "tripType": "roundtrip",
+      "carrierCode": "SQ",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "미주 특가 LA 직항 편도 60만",
+    "expected": {
+      "origin": "ICN",
+      "destination": "LAX",
+      "priceKrw": 600000,
+      "tripType": "oneway",
+      "carrierCode": null,
+      "carrierClass": "mixed"
+    }
+  },
+  {
+    "title": "베트남 다낭 99,900원부터",
+    "expected": {
+      "origin": "ICN",
+      "destination": "DAD",
+      "priceKrw": 99900,
+      "tripType": "roundtrip",
+      "carrierCode": null,
+      "carrierClass": "mixed"
+    }
+  },
+  {
+    "title": "세부 패키지 호텔 3박 포함 79만원",
+    "expected": {
+      "origin": null,
+      "destination": null,
+      "priceKrw": null,
+      "tripType": null,
+      "carrierCode": null,
+      "carrierClass": "mixed"
+    }
+  },
+  {
+    "title": "[진에어] 인천-방콕 왕복 199,000원 5월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "BKK",
+      "priceKrw": 199000,
+      "tripType": "roundtrip",
+      "carrierCode": "LJ",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "티웨이항공 인천-타이베이 왕복 189,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "TPE",
+      "priceKrw": 189000,
+      "tripType": "roundtrip",
+      "carrierCode": "TW",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "[아시아나항공] 인천-홍콩 왕복 299,000원 2026-05-10~05-25",
+    "expected": {
+      "origin": "ICN",
+      "destination": "HKG",
+      "priceKrw": 299000,
+      "tripType": "roundtrip",
+      "carrierCode": "OZ",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "에어서울 ICN-NRT 왕복 159,000원 6~7월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "NRT",
+      "priceKrw": 159000,
+      "tripType": "roundtrip",
+      "carrierCode": "RS",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "[비엣젯항공] 인천-호치민 편도 9만원대",
+    "expected": {
+      "origin": "ICN",
+      "destination": "SGN",
+      "priceKrw": 90000,
+      "tripType": "oneway",
+      "carrierCode": "VJ",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "세부퍼시픽 인천-마닐라 왕복 179,000원 5월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "MNL",
+      "priceKrw": 179000,
+      "tripType": "roundtrip",
+      "carrierCode": "5J",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "일본 삿포로 피치항공 왕복 139,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "CTS",
+      "priceKrw": 139000,
+      "tripType": "roundtrip",
+      "carrierCode": "MM",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "[에어부산] 인천-오키나와 왕복 209,000원 6월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "OKA",
+      "priceKrw": 209000,
+      "tripType": "roundtrip",
+      "carrierCode": "BX",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "하와이 호놀룰루 대한항공 왕복 89만원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "HNL",
+      "priceKrw": 890000,
+      "tripType": "roundtrip",
+      "carrierCode": "KE",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "상하이 PVG 중국남방항공 왕복 229,000원 5월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "PVG",
+      "priceKrw": 229000,
+      "tripType": "roundtrip",
+      "carrierCode": "CZ",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "[ANA] 도쿄 왕복 329,000원 2026-05-03~05-07",
+    "expected": {
+      "origin": "ICN",
+      "destination": "NRT",
+      "priceKrw": 329000,
+      "tripType": "roundtrip",
+      "carrierCode": "NH",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "동경 왕복 145,000원 JAL 3월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "NRT",
+      "priceKrw": 145000,
+      "tripType": "roundtrip",
+      "carrierCode": "JL",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "캐세이퍼시픽 인천-홍콩 왕복 350,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "HKG",
+      "priceKrw": 350000,
+      "tripType": "roundtrip",
+      "carrierCode": "CX",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "대만 타이베이 에바항공 왕복 220,000원 2026-06",
+    "expected": {
+      "origin": "ICN",
+      "destination": "TPE",
+      "priceKrw": 220000,
+      "tripType": "roundtrip",
+      "carrierCode": "BR",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "[베트남항공] 하노이 호치민 왕복 350,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "SGN",
+      "priceKrw": 350000,
+      "tripType": "roundtrip",
+      "carrierCode": "VN",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "쿠알라룸푸르 에어아시아 왕복 290,000원 7월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "KUL",
+      "priceKrw": 290000,
+      "tripType": "roundtrip",
+      "carrierCode": "AK",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "괌 여행 제주항공 왕복 35만원 5월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "GUM",
+      "priceKrw": 350000,
+      "tripType": "roundtrip",
+      "carrierCode": "7C",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "[델타항공] JFK 뉴욕 왕복 1,290,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "JFK",
+      "priceKrw": 1290000,
+      "tripType": "roundtrip",
+      "carrierCode": "DL",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "타이항공 방콕 왕복 310,000원 6월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "BKK",
+      "priceKrw": 310000,
+      "tripType": "roundtrip",
+      "carrierCode": "TG",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "말레이시아항공 쿠알라룸푸르 왕복 370,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "KUL",
+      "priceKrw": 370000,
+      "tripType": "roundtrip",
+      "carrierCode": "MH",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "필리핀항공 인천-세부 왕복 259,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "CEB",
+      "priceKrw": 259000,
+      "tripType": "roundtrip",
+      "carrierCode": "PR",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "[이스타항공] 인천-방콕 편도 89,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "BKK",
+      "priceKrw": 89000,
+      "tripType": "oneway",
+      "carrierCode": "ZE",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "젯스타재팬 인천-오사카 왕복 129,000원 3~4월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "KIX",
+      "priceKrw": 129000,
+      "tripType": "roundtrip",
+      "carrierCode": "GK",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "하와이안항공 HNL 왕복 980,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "HNL",
+      "priceKrw": 980000,
+      "tripType": "roundtrip",
+      "carrierCode": "HA",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "아메리칸항공 LAX 왕복 1,090,000원 2026-07",
+    "expected": {
+      "origin": "ICN",
+      "destination": "LAX",
+      "priceKrw": 1090000,
+      "tripType": "roundtrip",
+      "carrierCode": "AA",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "유나이티드항공 인천-뉴욕 왕복 1,490,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "JFK",
+      "priceKrw": 1490000,
+      "tripType": "roundtrip",
+      "carrierCode": "UA",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "중화항공 타이베이 왕복 239,000원 9월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "TPE",
+      "priceKrw": 239000,
+      "tripType": "roundtrip",
+      "carrierCode": "CI",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "에어차이나 상하이 왕복 269,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "PVG",
+      "priceKrw": 269000,
+      "tripType": "roundtrip",
+      "carrierCode": "CA",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "에어프레미아 인천-LAX 왕복 780,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "LAX",
+      "priceKrw": 780000,
+      "tripType": "roundtrip",
+      "carrierCode": "YP",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "나고야 NGO 아시아나항공 왕복 229,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "NGO",
+      "priceKrw": 229000,
+      "tripType": "roundtrip",
+      "carrierCode": "OZ",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "[스케줄 조정] 프로모션 없는 공지사항",
+    "expected": {
+      "origin": "ICN",
+      "destination": null,
+      "priceKrw": null,
+      "tripType": "roundtrip",
+      "carrierCode": null,
+      "carrierClass": "mixed"
+    }
+  },
+  {
+    "title": "진에어 인천-다낭 왕복 29만원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "DAD",
+      "priceKrw": 290000,
+      "tripType": "roundtrip",
+      "carrierCode": "LJ",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "[대한항공] 인천-삿포로 왕복 219,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": "CTS",
+      "priceKrw": 219000,
+      "tripType": "roundtrip",
+      "carrierCode": "KE",
+      "carrierClass": "fsc"
+    }
+  },
+  {
+    "title": "제주항공 인천-마닐라 왕복 20만원대 6월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "MNL",
+      "priceKrw": 200000,
+      "tripType": "roundtrip",
+      "carrierCode": "7C",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "티웨이 인천-하노이 왕복 229,000원",
+    "expected": {
+      "origin": "ICN",
+      "destination": null,
+      "priceKrw": 229000,
+      "tripType": "roundtrip",
+      "carrierCode": "TW",
+      "carrierClass": "lcc"
+    }
+  },
+  {
+    "title": "대만 타이베이 대한항공 왕복 380,000원 8월",
+    "expected": {
+      "origin": "ICN",
+      "destination": "TPE",
+      "priceKrw": 380000,
+      "tripType": "roundtrip",
+      "carrierCode": "KE",
+      "carrierClass": "fsc"
+    }
+  }
+]

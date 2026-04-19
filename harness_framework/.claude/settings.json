@@ -1,0 +1,50 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONIOENCODING=utf-8 py -3.12 \"${CLAUDE_PROJECT_DIR}/scripts/hooks/phase_status.py\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONIOENCODING=utf-8 py -3.12 \"${CLAUDE_PROJECT_DIR}/scripts/hooks/check_ui_slop.py\""
+          },
+          {
+            "type": "command",
+            "command": "PYTHONIOENCODING=utf-8 py -3.12 \"${CLAUDE_PROJECT_DIR}/scripts/hooks/block_secret_writes.py\""
+          },
+          {
+            "type": "command",
+            "command": "PYTHONIOENCODING=utf-8 py -3.12 \"${CLAUDE_PROJECT_DIR}/scripts/hooks/block_deprecated_targets.py\""
+          },
+          {
+            "type": "command",
+            "command": "PYTHONIOENCODING=utf-8 py -3.12 \"${CLAUDE_PROJECT_DIR}/scripts/hooks/block_llm_runtime.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONIOENCODING=utf-8 py -3.12 \"${CLAUDE_PROJECT_DIR}/scripts/hooks/block_llm_deps.py\""
+          },
+          {
+            "type": "command",
+            "command": "PYTHONIOENCODING=utf-8 py -3.12 \"${CLAUDE_PROJECT_DIR}/scripts/hooks/block_dangerous.py\""
+          }
+        ]
+      }
+    ]
+  }
+}

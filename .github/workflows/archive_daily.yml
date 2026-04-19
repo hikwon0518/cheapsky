@@ -1,0 +1,50 @@
+# Cheapsky — 일별 TOP 5 아카이브 스냅샷 (Stretch 2, PRD "아카이브 페이지").
+#
+# cron: 매일 UTC 15:05 = KST 00:05.
+#   - hot_deal=true AND verification_status=active 의 discount_rate DESC 상위 5
+#   - archive_snapshots(date, deal_ids, captured_at) UPSERT (date PK, 멱등)
+#
+# Hard red lines:
+#   - CHEAPSKY_STAGE 설정 금지 (LLM 무관 → Core gate 유지).
+#   - Anthropic 키 주입 금지 (archiver 는 SDK 호출 없음).
+
+name: archive_daily
+
+on:
+  schedule:
+    # UTC 15:05 = KST 00:05 (ARCHITECTURE.md 데이터 흐름 (4) 인접).
+    - cron: '5 15 * * *'
+  workflow_dispatch:
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run archive_daily
+        run: pnpm tsx scripts/archive_daily.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # CHEAPSKY_STAGE: 설정하지 않음 (LLM 무관 → Core gate 유지).

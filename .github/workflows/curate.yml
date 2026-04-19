@@ -1,0 +1,56 @@
+# Cheapsky — LLM 카드 한 줄 큐레이션 (Stretch 2, ADR-005).
+#
+# cron: 매 시간 30분. 시간당 50회 상한 (ADR-005).
+# 로컬 재실행:
+#   cd app && CHEAPSKY_STAGE=stretch pnpm tsx scripts/curate.ts
+#
+# Hard red lines:
+#   - CHEAPSKY_STAGE=stretch 만 여기에 명시 — Core workflows (crawl/verify/cost_check)
+#     에는 전파 금지 (ADR-005 gate 정의).
+#   - Haiku 4.5 외 모델 사용 금지 (services/curator.ts 가 고정).
+#   - Anthropic SDK 는 Stretch 전용 — Core 워크플로우에서는 설치·실행 금지.
+
+name: curate
+
+on:
+  schedule:
+    # UTC 매 시간 30분 (KST +9). 시간당 1회 실행, 배치 내부에서 50회 상한.
+    - cron: '30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  curate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: app
+    env:
+      # ADR-005: 이 워크플로우에서만 Stretch gate 해제 → Anthropic SDK 허용.
+      CHEAPSKY_STAGE: stretch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run curate
+        run: pnpm tsx scripts/curate.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_DAILY_BUDGET: '300'

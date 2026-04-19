@@ -1,0 +1,31 @@
+{
+  "project": "cheapsky",
+  "phase": "1-stretch-sources",
+  "steps": [
+    {
+      "step": 0,
+      "name": "ruliweb-crawler",
+      "status": "completed",
+      "completed_at": "2026-04-19T00:45:00+09:00",
+      "summary": "services/crawlers/ruliweb.ts (pure, robots 확인: /market/board/1020 허용 · Disallow 목록 /search /timeline /member /*cate= 등 회피, 1s spacing, UTF-8 dynamic decode, no author) + types.ts 의 ParsedListItem 에 views/comments/recommends optional. crawlRuliwebWithSignals sibling export (RawPost 비확장 유지). scripts/crawl.ts 다중 소스 루프 + views 백분위 social_signal (hot 상위 20% · trending 다음 20%) + max-priority merge. 248/248 tests pass, 실 crawl: ppomppu 20 posts + ruliweb 28 posts, saved 0 (항공권 글 부재)."
+    },
+    {
+      "step": 1,
+      "name": "playwings-crawler",
+      "status": "completed",
+      "started_at": "2026-04-19T09:43:17+0900",
+      "completed_at": "2026-04-19T09:55:00+0900",
+      "summary": "playwings crawler (RSS 발견 여부: no — 정식 RSS 없음. sitemap-0.xml 을 구조화 피드로 사용: /sitemap-index.xml → /sitemap-0.xml, UTF-8, 순수 함수, 1s 간격, 작성자 미수집, og:description 500자 cut, ALLOWED_PATHS 는 /sitemap-* + /deals/ 한정). parseRssItems 는 `<rss>` / Atom `<feed>` / `<urlset>` 3종 지원. parseListHtml 은 /deals/<id> 앵커 필터. scripts/crawl.ts 3-source 확장 (ppomppu + ruliweb + playwings). 286/286 tests pass, 실 crawl 샘플: ppomppu 0 / ruliweb 0 / playwings 27 saved (aggregator 첫 가격 추출)."
+    },
+    {
+      "step": 2,
+      "name": "community-picks-ui",
+      "status": "completed",
+      "started_at": "2026-04-19T10:02:16+0900",
+      "completed_at": "2026-04-19T10:13:03+0900",
+      "summary": "CommunityPicks.tsx (Server Component, DealCard variant='list' 재사용, showSocialSignalLabel prop 으로 HOT/TRENDING 표기) + scripts/crawl.ts 의 social_signal 판정 로직을 services/social-signal.ts 로 pure function 분리 (computeSocialSignals: views 상위 20% hot · 다음 20% trending / maxSocialSignal: hot>trending>null). page.tsx 는 social_signal IS NOT NULL · verification_status='active' · expires_at>now 쿼리 후 hot>trending>postedAt 수동 정렬 top 8, hero→picks→list 3 단계 id 중복 제거. DealCard 에 showSocialSignalLabel optional prop 추가 (기본 false). 조회수·댓글수 숫자 UI 노출 0. build / 295 tests / typecheck / lint 통과, 실 crawl 정상 (ppomppu 20 · ruliweb 28 · playwings 27 saved)."
+    }
+  ],
+  "created_at": "2026-04-19T09:43:17+0900",
+  "completed_at": "2026-04-19T10:13:03+0900"
+}

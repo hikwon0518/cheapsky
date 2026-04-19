@@ -1,0 +1,53 @@
+# Cheapsky — 뽐뿌 크롤 (Core, ADR-002 GH Actions cron · ADR-004 소스).
+#
+# cron: 매 15 분. Public repo 전제로 분 한도 무제한 (ADR-002).
+# 로컬 재실행:
+#   cd app && pnpm tsx scripts/crawl.ts
+#
+# Hard red lines (step6.md 금지사항):
+#   - CHEAPSKY_STAGE 설정 금지 (Core 워크플로우는 훅 게이트에서 `core` 취급 → LLM SDK 차단)
+#   - ingest_market.yml 파일 자체를 만들지 않음 (ADR-022 Deprecated, Stretch 3 조건부)
+#   - UI-only 패닉 플래그(ADR-028)는 배치에 전파하지 않음
+
+name: crawl
+
+on:
+  schedule:
+    # UTC 기준 매 15분. KST 는 UTC+9.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run crawl
+        run: pnpm tsx scripts/crawl.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          CRAWLER_USER_AGENT: ${{ secrets.CRAWLER_USER_AGENT }}
+          # CHEAPSKY_STAGE: 설정하지 않음 (ADR-005 Core gate, step6.md 금지사항).

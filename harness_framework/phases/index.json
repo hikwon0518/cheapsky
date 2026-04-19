@@ -1,0 +1,19 @@
+{
+  "phases": [
+    {
+      "dir": "0-core-mvp",
+      "status": "completed",
+      "completed_at": "2026-04-18T23:42:00+09:00"
+    },
+    {
+      "dir": "1-stretch-sources",
+      "status": "completed",
+      "completed_at": "2026-04-19T10:13:03+0900"
+    },
+    {
+      "dir": "2-stretch-enhancements",
+      "status": "completed",
+      "completed_at": "2026-04-19T12:05:19+0900"
+    }
+  ]
+}
